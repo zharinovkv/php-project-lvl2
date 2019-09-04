@@ -7,13 +7,15 @@
             "email": "zharinovkv@gmail.com"
         }
     ],
-    "description": "php-project-lvl1",
+    "description": "php-project-lvl2",
     "keywords": [
         "PHP", 
         "hexlet"
     ],
     "type": "project",
-    "bin": ["bin/gendiff"],
+    "bin": [
+        "bin/gendiff"
+    ],
     "require": {
         "docopt/docopt": "^1.0"
     },
