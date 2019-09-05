@@ -27,8 +27,7 @@
     },
     "autoload": {
         "files": [
-            "src/gendiff.php",
-            "vendor/docopt/docopt/src/docopt.php"
+            "src/gendiff.php"
         ]
     }
 }
