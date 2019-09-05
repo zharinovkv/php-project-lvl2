@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f9eb26c329bf862eeed09d0403a599e0",
+    "content-hash": "2b0fdf974d395c2015fc817ada058efa",
     "packages": [
         {
             "name": "docopt/docopt",
@@ -51,7 +51,9 @@
                 "docs"
             ],
             "time": "2015-10-30T03:21:23+00:00"
-        },
+        }
+    ],
+    "packages-dev": [
         {
             "name": "squizlabs/php_codesniffer",
             "version": "3.4.2",
@@ -104,7 +106,6 @@
             "time": "2019-04-10T23:49:02+00:00"
         }
     ],
-    "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": [],
