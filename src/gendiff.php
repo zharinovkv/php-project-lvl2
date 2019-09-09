@@ -2,29 +2,10 @@
 
 namespace php_project_lvl2\gendiff;
 
-use Docopt;
+use function Funct\Collection\union;
 
-function run()
+function genDiff($path_before, $path_after)
 {
-    $doc = <<<'DOCOPT'
-Generate diff
-
-Usage:
-  gendiff (-h|--help)
-  gendiff (-v|--version)
-  gendiff [--format <fmt>] <firstFile> <secondFile>
-
-  Options:
-  -h --help                     Show this screen
-  -v --version                  Show version
-  --format <fmt>                Report format [default: pretty]
-
-DOCOPT;
-
-    $result = Docopt::handle($doc, array('version' => '1.0.0rc2'));
-
-    $path_before = $result->args["<firstFile>"];
-    $path_after = $result->args["<secondFile>"];
 
     $before = file_get_contents($path_before);
     $beforeArr = (array) json_decode($before);
@@ -68,17 +49,17 @@ DOCOPT;
     $revisedElementsAfter = arToAr($revisedElementsAfter, '-');
     $unicalElementsBefore = arToAr($unicalElementsBefore, '+');
     $unicalElementsAfter = arToAr($unicalElementsAfter, '-');
+   
+    $result = union($unUnicalElements,
+    $revisedElementsBefor,
+    $revisedElementsAfter,
+    $unicalElementsBefore,
+    $unicalElementsAfter);
 
-    $result = array_merge(
-        $unUnicalElements,
-        $revisedElementsBefor,
-        $revisedElementsAfter,
-        $unicalElementsBefore,
-        $unicalElementsAfter
-    );
     $str = toString($result);
     $str = str_replace('"', '', $str);
     echo $str;
+    return $str;
 }
 
 function arToAr($func, $prefix)
