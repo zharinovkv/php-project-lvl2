@@ -69,7 +69,7 @@ DOCOPT;
     $unicalElementsBefore = arToAr($unicalElementsBefore, '+');
     $unicalElementsAfter = arToAr($unicalElementsAfter, '-');
 
-    $result = array_merge( 
+    $result = array_merge(
         $unUnicalElements,
         $revisedElementsBefor,
         $revisedElementsAfter,
