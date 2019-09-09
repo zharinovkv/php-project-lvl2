@@ -33,33 +33,33 @@ DOCOPT;
     $afterArr = (array) json_decode($after);
 
     $repeatElements = function () use ($beforeArr, $afterArr) {
-        $result = array_intersect($beforeArr, $afterArr);    
+        $result = array_intersect($beforeArr, $afterArr);
         return $result;
     };
 
-    $revisedElementsBefor = function () use ($beforeArr, $afterArr){   
-        $result = array_diff (
+    $revisedElementsBefor = function () use ($beforeArr, $afterArr) {
+        $result = array_diff(
             array_intersect_key($afterArr, $beforeArr),
             array_intersect_key($beforeArr, $afterArr)
         );
         return $result;
     };
     
-    $revisedElementsAfter = function () use ($beforeArr, $afterArr){   
-        $result = array_diff (
-            array_intersect_key($beforeArr, $afterArr), 
+    $revisedElementsAfter = function () use ($beforeArr, $afterArr) {
+        $result = array_diff(
+            array_intersect_key($beforeArr, $afterArr),
             array_intersect_key($afterArr, $beforeArr)
         );
         return $result;
     };
 
-    $unicalElementsBefore = function () use ($beforeArr, $afterArr){
-        $result = array_diff_key($afterArr, $beforeArr);  
+    $unicalElementsBefore = function () use ($beforeArr, $afterArr) {
+        $result = array_diff_key($afterArr, $beforeArr);
         return $result;
     };
     
-    $unicalElementsAfter = function () use ($beforeArr, $afterArr){
-        $result = array_diff_key($beforeArr, $afterArr);  
+    $unicalElementsAfter = function () use ($beforeArr, $afterArr) {
+        $result = array_diff_key($beforeArr, $afterArr);
         return $result;
     };
 
@@ -69,14 +69,14 @@ DOCOPT;
     $unicalElementsBefore = arToAr($unicalElementsBefore, '+');
     $unicalElementsAfter = arToAr($unicalElementsAfter, '-');
 
-    $result = array_merge($unUnicalElements, $revisedElementsBefor, $revisedElementsAfter, 
-                            $unicalElementsBefore, $unicalElementsAfter);
+    $result = array_merge($unUnicalElements, $revisedElementsBefor, $revisedElementsAfter, $unicalElementsBefore, $unicalElementsAfter);
     $str = toString($result);
     $str = str_replace('"', '', $str);
     echo $str;
 }
 
-function arToAr($func, $prefix) {
+function arToAr($func, $prefix)
+{
     $result = [];
     $arr = $func();
     foreach ($arr as $key => $value) {
@@ -85,7 +85,8 @@ function arToAr($func, $prefix) {
     return $result;
 }
 
-function toString($result) {
+function toString($result)
+{
     $str = '{' . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . '}' . PHP_EOL;
     return $str;
 }
