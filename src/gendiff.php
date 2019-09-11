@@ -1,6 +1,6 @@
 <?php
 
-namespace php_project_lvl2\gendiff;
+namespace Differ\gendiff;
 
 use function Funct\Collection\union;
 
