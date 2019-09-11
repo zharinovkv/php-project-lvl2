@@ -50,11 +50,13 @@ function genDiff($path_before, $path_after)
     $unicalElementsBefore = arToAr($unicalElementsBefore, '+');
     $unicalElementsAfter = arToAr($unicalElementsAfter, '-');
    
-    $result = union($unUnicalElements,
-    $revisedElementsBefor,
-    $revisedElementsAfter,
-    $unicalElementsBefore,
-    $unicalElementsAfter);
+    $result = union(
+        $unUnicalElements,
+        $revisedElementsBefor,
+        $revisedElementsAfter,
+        $unicalElementsBefore,
+        $unicalElementsAfter
+    );
 
     $str = toString($result);
     $str = str_replace('"', '', $str);
