@@ -5,9 +5,9 @@ namespace Differ\gendiff;
 use function Funct\Strings\stripPunctuation;
 use Docopt;
 
-function run(){
-
-$doc = <<<'DOCOPT'
+function run()
+{
+    $doc = <<<'DOCOPT'
 Generate diff
 
 Usage:
@@ -24,7 +24,7 @@ DOCOPT;
 
     $result = Docopt::handle($doc, array('version' => '0.0.1'));
     $diff = genDiff($result->args["<firstFile>"], $result->args["<secondFile>"]);
-    echo $diff;    
+    echo $diff;
 }
 
 function genDiff($path_before, $path_after)
@@ -56,7 +56,7 @@ function genDiff($path_before, $path_after)
 
             foreach ($beforeArr as $key_before => $value_before) {
                 foreach ($afterArr as $key_after => $value_after) {
-                    if($key_before == $key_after && $value_before != $value_after){
+                    if ($key_before == $key_after && $value_before != $value_after) {
                         $revised[$key_after . ': ' . $value_after] = $key_before . ': ' . $value_before;
                         break;
                     }
@@ -76,7 +76,8 @@ function genDiff($path_before, $path_after)
         $unicalElementsAfter = toString(getElements($unicalElementsAfter, '-'));
         $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
        
-        $str = '{' . PHP_EOL . $repeatElements . $revisedElements . $unicalElementsAfter . $unicalElementsBefore . '}' . PHP_EOL;   
+        $str = '{' . PHP_EOL . $repeatElements . $revisedElements . $unicalElementsAfter .
+            $unicalElementsBefore . '}' . PHP_EOL;
         return $str;
 }
 
