@@ -2,69 +2,86 @@
 
 namespace Differ\gendiff;
 
-use function Funct\Collection\union;
+use function Funct\Strings\stripPunctuation;
+use Docopt;
+
+function run(){
+
+$doc = <<<'DOCOPT'
+Generate diff
+
+Usage:
+  gendiff (-h|--help)
+  gendiff (-v|--version)
+  gendiff [--format <fmt>] <firstFile> <secondFile>
+
+  Options:
+  -h --help                     Show this screen
+  -v --version                  Show version
+  --format <fmt>                Report format [default: pretty]
+
+DOCOPT;
+
+    $result = Docopt::handle($doc, array('version' => '0.0.1'));
+    $diff = genDiff($result->args["<firstFile>"], $result->args["<secondFile>"]);
+    echo $diff;    
+}
 
 function genDiff($path_before, $path_after)
 {
-
-    $before = file_get_contents($path_before);
-    $beforeArr = (array) json_decode($before);
-
-    $after = file_get_contents($path_after);
-    $afterArr = (array) json_decode($after);
-
-    $repeatElements = function () use ($beforeArr, $afterArr) {
-        $result = array_intersect($beforeArr, $afterArr);
-        return $result;
-    };
-
-    $revisedElementsBefor = function () use ($beforeArr, $afterArr) {
-        $result = array_diff(
-            array_intersect_key($afterArr, $beforeArr),
-            array_intersect_key($beforeArr, $afterArr)
-        );
-        return $result;
-    };
+        $before = file_get_contents($path_before);
+        $beforeArr = (array) json_decode($before);
     
-    $revisedElementsAfter = function () use ($beforeArr, $afterArr) {
-        $result = array_diff(
-            array_intersect_key($beforeArr, $afterArr),
-            array_intersect_key($afterArr, $beforeArr)
-        );
-        return $result;
-    };
-
-    $unicalElementsBefore = function () use ($beforeArr, $afterArr) {
-        $result = array_diff_key($afterArr, $beforeArr);
-        return $result;
-    };
+        $after = file_get_contents($path_after);
+        $afterArr = (array) json_decode($after);
     
-    $unicalElementsAfter = function () use ($beforeArr, $afterArr) {
-        $result = array_diff_key($beforeArr, $afterArr);
-        return $result;
-    };
+        $repeatElements = function () use ($beforeArr, $afterArr) {
+            $result = array_intersect($beforeArr, $afterArr);
+            return $result;
+        };
+    
+        $unicalElementsBefore = function () use ($beforeArr, $afterArr) {
+            $result = array_diff_key($afterArr, $beforeArr);
+            return $result;
+        };
+        
+        $unicalElementsAfter = function () use ($beforeArr, $afterArr) {
+            $result = array_diff_key($beforeArr, $afterArr);
+            return $result;
+        };
 
-    $unUnicalElements = arToAr($repeatElements, ' ');
-    $revisedElementsBefor = arToAr($revisedElementsBefor, '+');
-    $revisedElementsAfter = arToAr($revisedElementsAfter, '-');
-    $unicalElementsBefore = arToAr($unicalElementsBefore, '+');
-    $unicalElementsAfter = arToAr($unicalElementsAfter, '-');
-   
-    $result = union(
-        $unUnicalElements,
-        $revisedElementsBefor,
-        $revisedElementsAfter,
-        $unicalElementsBefore,
-        $unicalElementsAfter
-    );
+        $revisedElements = function () use ($beforeArr, $afterArr) {
 
-    $str = toString($result);
-    $str = str_replace('"', '', $str);
-    echo $str;
-    return $str;
+            $revised = [];
+
+            foreach ($beforeArr as $key_before => $value_before) {
+                foreach ($afterArr as $key_after => $value_after) {
+                    if($key_before == $key_after && $value_before != $value_after){
+                        $revised[$key_after . ': ' . $value_after] = $key_before . ': ' . $value_before;
+                        break;
+                    }
+                }
+            }
+
+            $result = '';
+            foreach ($revised as $key => $value) {
+                $result .= '+ ' . $key . PHP_EOL . '- ' . $value . PHP_EOL;
+            }
+
+            return $result;
+        };
+    
+        $repeatElements = toString(getElements($repeatElements, ' '));
+        $revisedElements = $revisedElements();
+        $unicalElementsAfter = toString(getElements($unicalElementsAfter, '-'));
+        $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
+       
+        $str = '{' . PHP_EOL . $repeatElements . $revisedElements . $unicalElementsAfter . $unicalElementsBefore . '}' . PHP_EOL;   
+        return $str;
 }
 
-function arToAr($func, $prefix)
+
+function getElements($func, $prefix)
 {
     $result = [];
     $arr = $func();
@@ -74,8 +91,9 @@ function arToAr($func, $prefix)
     return $result;
 }
 
-function toString($result)
+function toString($array)
 {
-    $str = '{' . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . '}' . PHP_EOL;
-    return $str;
+    $result = implode(PHP_EOL, $array) . PHP_EOL;
+    $result = str_replace("\"", "", $result);
+    return $result;
 }
