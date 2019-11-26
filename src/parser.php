@@ -13,12 +13,10 @@ if (file_exists($autoloadPath1)) {
 
 use Symfony\Component\Yaml\Yaml;
 
-function parser(){
+function parser()
+{
     $value = Yaml::parseFile('assets/before.yaml');
     var_dump($value);
 }
 
-
-
 // https://github.com/Hexlet/patterns/tree/master/content/factory
-

@@ -3,6 +3,7 @@
 namespace Differ\gendifftest;
 
 use PHPUnit\Framework\TestCase;
+
 use function Differ\gendiff\genDiff;
 use function Differ\parser\parser;
 
