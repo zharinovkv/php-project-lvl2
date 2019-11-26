@@ -7,3 +7,8 @@ Installation
 composer require zharinov/php-project-lvl2
 
 
+./gendiff ../assets/before.json ../assets/after.json
+
+composer phpunit tests
+
+// php src/parser.php

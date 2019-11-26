@@ -2,7 +2,6 @@
 
 namespace Differ\gendiff;
 
-use function Funct\Strings\stripPunctuation;
 use Docopt;
 
 function run()
@@ -29,11 +28,8 @@ DOCOPT;
 
 function genDiff($path_before, $path_after)
 {
-        $before = file_get_contents($path_before);
-        $beforeArr = (array) json_decode($before);
-    
-        $after = file_get_contents($path_after);
-        $afterArr = (array) json_decode($after);
+    $beforeArr = fileGetContents($path_before);
+    $afterArr = fileGetContents($path_after);
     
         $repeatElements = function () use ($beforeArr, $afterArr) {
             $result = array_intersect($beforeArr, $afterArr);
@@ -52,20 +48,15 @@ function genDiff($path_before, $path_after)
 
         $revisedElements = function () use ($beforeArr, $afterArr) {
 
-            $revised = [];
+            $result = '';
 
             foreach ($beforeArr as $key_before => $value_before) {
                 foreach ($afterArr as $key_after => $value_after) {
                     if ($key_before == $key_after && $value_before != $value_after) {
-                        $revised[$key_after . ': ' . $value_after] = $key_before . ': ' . $value_before;
+                        $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL . '- ' . $key_before . ': ' . $value_before . PHP_EOL;
                         break;
                     }
                 }
-            }
-
-            $result = '';
-            foreach ($revised as $key => $value) {
-                $result .= '+ ' . $key . PHP_EOL . '- ' . $value . PHP_EOL;
             }
 
             return $result;
@@ -75,9 +66,9 @@ function genDiff($path_before, $path_after)
         $revisedElements = $revisedElements();
         $unicalElementsAfter = toString(getElements($unicalElementsAfter, '-'));
         $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
-       
+
         $str = '{' . PHP_EOL . $repeatElements . $revisedElements . $unicalElementsAfter .
-            $unicalElementsBefore . '}' . PHP_EOL;
+            $unicalElementsBefore . '}';
         return $str;
 }
 
@@ -97,4 +88,10 @@ function toString($array)
     $result = implode(PHP_EOL, $array) . PHP_EOL;
     $result = str_replace("\"", "", $result);
     return $result;
+}
+
+function fileGetContents($path)
+{
+    $json = file_get_contents($path);
+    return (array) json_decode($json);
 }
