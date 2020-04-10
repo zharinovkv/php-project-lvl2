@@ -35,7 +35,8 @@
         "psr-4": { "Symfony\\Component\\Yaml\\": "" },
         "files": [
             "src/gendiff.php",
-            "src/parser.php"
+            "src/parser.php",
+            "src/differ.php"
         ]
     }
 }
