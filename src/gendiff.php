@@ -22,7 +22,6 @@ Usage:
 DOCOPT;
 
     $result = Docopt::handle($doc, array('version' => '0.0.1'));
-    $content = \Differ\differ\genDiff($result->args["<firstFile>"], $result->args["<secondFile>"]);
-    $diff = \Differ\differ\parser($content);
+    $diff = \Differ\differ\genDiff($result->args["<firstFile>"], $result->args["<secondFile>"]);
     echo $diff;
 }

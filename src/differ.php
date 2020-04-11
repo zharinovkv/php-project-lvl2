@@ -8,23 +8,8 @@ const ASSETS = 'assets/';
 
 function genDiff($path_before, $path_after)
 {
-    $extention = pathinfo($path_before, PATHINFO_EXTENSION);
-    $content = [];
+    $content = selectContentFiles($path_before, $path_after);
 
-    if ($extention == 'json') {
-        $content['before'] = fileGetContents($path_before);
-        $content['after'] = fileGetContents($path_after);
-    } elseif ($extention == 'yaml') {
-        $content['before'] = Yaml::parseFile($path_before);
-        $content['after'] = Yaml::parseFile($path_after);
-    } elseif ($extention == 'ini') {
-        // parse = ini.parse;
-    }
-    return $content;
-}
-
-function parser($content)
-{
     $beforeArr = $content['before'];
     $afterArr = $content['after'];
 
@@ -64,16 +49,32 @@ function parser($content)
     $unicalElementsAfter = toString(getElements($unicalElementsAfter, '-'));
     $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
 
-    $str = '{' . PHP_EOL . $repeatElements . $revisedElements . $unicalElementsAfter .
-        $unicalElementsBefore . '}' . PHP_EOL;
+    $str = "{\n\r{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}\n\r";
     return $str;
 }
 
+function selectContentFiles($path_before, $path_after)
+{
+    $extention = pathinfo($path_before, PATHINFO_EXTENSION);
+    $content = [];
+
+    if ($extention == 'json') {
+        $content['before'] = fileGetContents($path_before);
+        $content['after'] = fileGetContents($path_after);
+    } elseif ($extention == 'yaml') {
+        $content['before'] = Yaml::parseFile($path_before);
+        $content['after'] = Yaml::parseFile($path_after);
+    } elseif ($extention == 'ini') {
+        // parse = ini.parse;
+    }
+    return $content;
+}
 
 function getElements($func, $prefix)
 {
     $result = [];
     $arr = $func();
+
     foreach ($arr as $key => $value) {
         array_push($result, "{$prefix} {$key}: " . json_encode($value));
     }
@@ -89,7 +90,12 @@ function toString($array)
 
 function fileGetContents($path)
 {
-    !(bool)substr_count($path, '/') ? $path = ASSETS . $path : $path;
+    $path = getPathToFile($path);
     $json = file_get_contents($path);
     return (array)json_decode($json);
+}
+
+function getPathToFile($path)
+{
+    return !(bool)substr_count($path, '/') ? $path = ASSETS . $path : $path;
 }
