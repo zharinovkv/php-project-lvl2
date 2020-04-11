@@ -12,24 +12,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v1
-        with:
-          php-version: '7.3'
+    - name: Validate composer.json and composer.lock
+      run: composer validate
 
-      - name: Install
-        run: make install
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Run linter
-        run: make lint
+    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
+    # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-      - name: Run test & publish code coverage
-        uses: paambaati/codeclimate-action@v2.4.0
-        # Add Code Climate secret key
-        env:
-          CC_TEST_REPORTER_ID: ${{ a8fce8317fd3f12d2f4d3b5e336afbb1eaa86add }}
-        with:
-          coverageCommand: make test
-          debug: true
+    # - name: Run test suite
+    #   run: composer run-script test
