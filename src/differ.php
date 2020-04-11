@@ -50,7 +50,7 @@ function genDiff($path_before, $path_after)
     $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
 
     $newline = "\n";
-    $str = "{{$newline}{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}{$newline}";
+    $str = "{{$newline}{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}";
     return $str;
 }
 
