@@ -49,7 +49,7 @@ function genDiff($path_before, $path_after)
     $unicalElementsAfter = toString(getElements($unicalElementsAfter, '-'));
     $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
 
-    $str = "{\n{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}\n";
+    $str = "{".PHP_EOL."{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}".PHP_EOL."}";
     return $str;
 }
 
