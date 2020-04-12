@@ -10,48 +10,36 @@ function genDiff($path_before, $path_after)
 {
     $content = selectContentFiles($path_before, $path_after);
 
-    $beforeArr = $content['before'];
-    $afterArr = $content['after'];
+    $beforeArr = getContent($content, 'before');
+    $afterArr = getContent($content, 'after');
 
-    $repeatElements = function () use ($beforeArr, $afterArr) {
-        $result = array_intersect($beforeArr, $afterArr);
-        return $result;
-    };
+    $repeatElements = toString(getElements(array_intersect($beforeArr, $afterArr), ' '));
+    $revisedElements = revisedElements($beforeArr, $afterArr);
+    $unicalElementsAfter = toString(getElements(array_diff_key($beforeArr, $afterArr), '-'));
+    $unicalElementsBefore = toString(getElements(array_diff_key($afterArr, $beforeArr), '+'));
 
-    $unicalElementsBefore = function () use ($beforeArr, $afterArr) {
-        $result = array_diff_key($afterArr, $beforeArr);
-        return $result;
-    };
+    return "{\n{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}\n";
+}
 
-    $unicalElementsAfter = function () use ($beforeArr, $afterArr) {
-        $result = array_diff_key($beforeArr, $afterArr);
-        return $result;
-    };
+function getContent($content, $index)
+{
+    return $content[$index];
+}
 
-    $revisedElements = function () use ($beforeArr, $afterArr) {
+function revisedElements ($beforeArr, $afterArr)
+{
 
-        $result = '';
+    $result = '';
 
-        foreach ($beforeArr as $key_before => $value_before) {
-            foreach ($afterArr as $key_after => $value_after) {
-                if ($key_before == $key_after && $value_before != $value_after) {
-                    $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL .
-                        '- ' . $key_before . ': ' . $value_before . PHP_EOL;
-                    break;
-                }
+    foreach ($beforeArr as $key_before => $value_before) {
+        foreach ($afterArr as $key_after => $value_after) {
+            if ($key_before == $key_after && $value_before != $value_after) {
+                $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL . '- ' . $key_before . ': ' . $value_before . PHP_EOL;
+                break;
             }
         }
-        return $result;
-    };
-
-    $repeatElements = toString(getElements($repeatElements, ' '));
-    $revisedElements = $revisedElements();
-    $unicalElementsAfter = toString(getElements($unicalElementsAfter, '-'));
-    $unicalElementsBefore = toString(getElements($unicalElementsBefore, '+'));
-
-    $newline = "\n";
-    $str = "{{$newline}{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}";
-    return $str;
+    }
+    return $result;
 }
 
 function selectContentFiles($path_before, $path_after)
@@ -71,12 +59,10 @@ function selectContentFiles($path_before, $path_after)
     return $content;
 }
 
-function getElements($func, $prefix)
+function getElements($array, $prefix)
 {
     $result = [];
-    $arr = $func();
-
-    foreach ($arr as $key => $value) {
+    foreach ($array as $key => $value) {
         array_push($result, "{$prefix} {$key}: " . json_encode($value));
     }
     return $result;
