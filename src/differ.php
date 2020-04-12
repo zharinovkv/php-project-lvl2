@@ -26,15 +26,15 @@ function getContent($content, $index)
     return $content[$index];
 }
 
-function revisedElements ($beforeArr, $afterArr)
+function revisedElements($beforeArr, $afterArr)
 {
-
     $result = '';
 
     foreach ($beforeArr as $key_before => $value_before) {
         foreach ($afterArr as $key_after => $value_after) {
             if ($key_before == $key_after && $value_before != $value_after) {
-                $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL . '- ' . $key_before . ': ' . $value_before . PHP_EOL;
+                $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL . '- ' . 
+                    $key_before . ': ' . $value_before . PHP_EOL;
                 break;
             }
         }
