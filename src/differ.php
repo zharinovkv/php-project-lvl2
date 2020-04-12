@@ -33,7 +33,7 @@ function revisedElements($beforeArr, $afterArr)
     foreach ($beforeArr as $key_before => $value_before) {
         foreach ($afterArr as $key_after => $value_after) {
             if ($key_before == $key_after && $value_before != $value_after) {
-                $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL . '- ' . 
+                $result .= '+ ' . $key_after . ': ' . $value_after . PHP_EOL . '- ' .
                     $key_before . ': ' . $value_before . PHP_EOL;
                 break;
             }
