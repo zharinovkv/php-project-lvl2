@@ -26,9 +26,20 @@ jobs:
     - name: Run linter
       run: composer run-script phpcs -- --standard=PSR12 src tests
 
-    - name: Test & publish code coverage
-      uses: actions/checkout@v2
+#    - name: Test & publish code coverage
+#      uses: actions/checkout@v2
+#      env:
+#        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+#      with:
+#        debug: true
+
+    # Publish code coverage on Code Climate
+    # https://github.com/paambaati/codeclimate-action
+    - name: Run test & publish code coverage
+      uses: paambaati/codeclimate-action@v2.4.0
+      # Add Code Climate secret key
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
+        coverageCommand: make test
         debug: true
