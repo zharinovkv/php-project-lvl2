@@ -36,7 +36,7 @@ jobs:
     # Publish code coverage on Code Climate
     # https://github.com/paambaati/codeclimate-action
     - name: Run test & publish code coverage
-      uses: paambaati/codeclimate-action@v2.4.0
+      #uses: paambaati/codeclimate-action@v2.4.0
       run: |
           export GIT_BRANCH="${GITHUB_REF/refs\/heads\//}"
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
