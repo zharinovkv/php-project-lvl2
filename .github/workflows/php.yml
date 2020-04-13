@@ -27,6 +27,7 @@ jobs:
       run: composer run-script phpcs -- --standard=PSR12 src tests
 
     - name: Test & publish code coverage
+      uses: actions/checkout@v2
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
