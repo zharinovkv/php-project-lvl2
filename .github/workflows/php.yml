@@ -39,3 +39,5 @@ jobs:
         with:
           coverageCommand: make test
           debug: true
+          after-build: --coverage-input-type clover
+        
