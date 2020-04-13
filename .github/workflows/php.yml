@@ -39,5 +39,5 @@ jobs:
         with:
           coverageCommand: make test
           debug: true
-          cc-test-reporter: after-build clover
+          cc-test-reporter: after-build [clover]
         
