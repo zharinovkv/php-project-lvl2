@@ -37,7 +37,6 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
+          coverage-input-type: clover        
           coverageCommand: make test
           debug: false
-#          cc-test-reporter: after-build [clover]
-        
