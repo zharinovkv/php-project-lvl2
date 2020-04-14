@@ -70,9 +70,9 @@ function getElements($array, $prefix)
 
 function toString($array)
 {
-    $result = implode(PHP_EOL, $array) . PHP_EOL;
+    $result = implode(PHP_EOL, $array);
     $result = str_replace("\"", "", $result);
-    return $result;
+    return $result . PHP_EOL;
 }
 
 function fileGetContents($path)
