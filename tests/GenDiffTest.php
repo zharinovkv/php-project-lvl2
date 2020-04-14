@@ -33,4 +33,11 @@ class GenDiffTest extends TestCase
         $diff = \Differ\differ\genDiff('assets/before.yaml', 'assets/after.yaml');
         $this->assertNotEquals($expected, $diff);
     }
+
+    public function testGetPathToFile()
+    {
+        $expected = '/home/konstantin/Development/hexlet/php-project-lvl2/assets/before.yaml';
+        $path = \Differ\differ\getPathToFile('before.yaml'); //('assets/before.yaml', 'assets/after.yaml');
+        $this->assertNotEquals($expected, $path);
+    }
 }
