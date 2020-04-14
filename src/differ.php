@@ -2,13 +2,11 @@
 
 namespace Differ\differ;
 
-use Symfony\Component\Yaml\Yaml;
-
 const ASSETS = 'assets/';
 
 function genDiff($path_before, $path_after)
 {
-    $content = selectContentFiles($path_before, $path_after);
+    $content = \Differ\parser\parser($path_before, $path_after);
 
     $beforeArr = getContent($content, 'before');
     $afterArr = getContent($content, 'after');
@@ -42,23 +40,6 @@ function revisedElements($beforeArr, $afterArr)
     return $result;
 }
 
-function selectContentFiles($path_before, $path_after)
-{
-    $extention = pathinfo($path_before, PATHINFO_EXTENSION);
-    $content = [];
-
-    if ($extention == 'json') {
-        $content['before'] = fileGetContents($path_before);
-        $content['after'] = fileGetContents($path_after);
-    } elseif ($extention == 'yaml') {
-        $content['before'] = Yaml::parseFile($path_before);
-        $content['after'] = Yaml::parseFile($path_after);
-    } elseif ($extention == 'ini') {
-        // parse = ini.parse;
-    }
-    return $content;
-}
-
 function getElements($array, $prefix)
 {
     $result = [];
@@ -79,7 +60,7 @@ function fileGetContents($path)
 {
     $path = getPathToFile($path);
     $json = file_get_contents($path);
-    return (array)json_decode($json);
+    return json_decode($json, true);
 }
 
 function getPathToFile($path)
