@@ -2,24 +2,34 @@
 
 namespace Differ\differ;
 
+use function Differ\parsers\parser;
+
 const ASSETS = 'assets/';
 
 function genDiff($path_before, $path_after)
 {
-    $content = \Differ\parser\parser($path_before, $path_after);
+    $paths = getAbsolutePathToFile($path_before, $path_after);
+    $content = parser($paths);
 
-    $beforeArr = getContent($content, 'before');
-    $afterArr = getContent($content, 'after');
+    [$before, $after] = [getBeforeOrAfter($content, 'path_before'), getBeforeOrAfter($content, 'path_after')];
 
-    $repeatElements = toString(getElements(array_intersect($beforeArr, $afterArr), ' '));
-    $revisedElements = revisedElements($beforeArr, $afterArr);
-    $unicalElementsAfter = toString(getElements(array_diff_key($beforeArr, $afterArr), '-'));
-    $unicalElementsBefore = toString(getElements(array_diff_key($afterArr, $beforeArr), '+'));
+    $repeatElements = toString(getElements(array_intersect($before, $after), ' '));
+    $revisedElements = revisedElements($before, $after);
+    $unicalElementsAfter = toString(getElements(array_diff_key($before, $after), '-'));
+    $unicalElementsBefore = toString(getElements(array_diff_key($after, $before), '+'));
 
     return "{\n{$repeatElements}{$revisedElements}{$unicalElementsAfter}{$unicalElementsBefore}}\n";
 }
 
-function getContent($content, $index)
+function getAbsolutePathToFile(...$path)
+{
+    return [
+        'path_before' => ! (bool)substr_count($path[0], '/') ? $path[0] = ASSETS . $path[0] : $path[0],
+        'path_after' => ! (bool)substr_count($path[1], '/') ? $path[1] = ASSETS . $path[1] : $path[1]
+    ];
+}
+
+function getBeforeOrAfter($content, $index)
 {
     return $content[$index];
 }
@@ -54,16 +64,4 @@ function toString($array)
     $result = implode(PHP_EOL, $array);
     $result = str_replace("\"", "", $result);
     return $result . PHP_EOL;
-}
-
-function fileGetContents($path)
-{
-    $path = getPathToFile($path);
-    $json = file_get_contents($path);
-    return json_decode($json, true);
-}
-
-function getPathToFile($path)
-{
-    return !(bool)substr_count($path, '/') ? $path = ASSETS . $path : $path;
 }
