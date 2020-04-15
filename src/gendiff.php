@@ -3,7 +3,8 @@
 namespace Differ\gendiff;
 
 use Docopt;
-use function \Differ\differ\genDiff;
+
+use function Differ\differ\genDiff;
 
 function run()
 {

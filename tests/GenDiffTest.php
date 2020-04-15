@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Differ\differ\genDiff;
 use function Differ\differ\getAbsolutePathToFile;
+
 use const Differ\differ\ASSETS;
 
 class GenDiffTest extends TestCase
