@@ -16,3 +16,7 @@ gendiff before.json after.json
 
 [![asciicast](https://asciinema.org/a/318570.svg)](https://asciinema.org/a/318570)
 
+gendiff before.yaml after.yaml
+
+[![asciicast](https://asciinema.org/a/320277.svg)](https://asciinema.org/a/320277)
+
