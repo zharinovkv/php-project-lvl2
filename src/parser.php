@@ -1,22 +1,20 @@
 <?php
 
-namespace Differ\parser;
+namespace Differ\parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parser($path_before, $path_after)
+function parser($paths)
 {
-    $extention = pathinfo($path_before, PATHINFO_EXTENSION);
-    $content = [];
+    $ext = pathinfo($paths['path_before'], PATHINFO_EXTENSION);
 
-    if ($extention == 'json') {
-        $content['before'] = \Differ\differ\fileGetContents($path_before);
-        $content['after'] = \Differ\differ\fileGetContents($path_after);
-    } elseif ($extention == 'yaml') {
-        $content['before'] = Yaml::parseFile($path_before);
-        $content['after'] = Yaml::parseFile($path_after);
-    } elseif ($extention == 'ini') {
-        // parse = ini.parse;
-    }
-    return $content;
+    $json = function ($path) {
+        return json_decode(file_get_contents($path), true);
+    };
+
+    $yaml = function ($path) {
+        return Yaml::parseFile($path);
+    };
+
+    return array_map(${$ext}, $paths);
 }
