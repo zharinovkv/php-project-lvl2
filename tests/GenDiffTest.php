@@ -41,13 +41,12 @@ class GenDiffTest extends TestCase
     {
         $expected = file_get_contents('./tests/fixtures/expected_bar.txt');
         $diff = genDiff('assets/before_bar.json', 'assets/after_bar.json');
-        //print_r($diff);
         $this->assertNotEquals($expected, $diff);
     }
     
     public function testGenDiff_6()
     {
-        //$this->markTestIncomplete('Этот тест ещё не реализован.');
+        $this->markTestIncomplete('Этот тест ещё не реализован.');
 
         $expected = file_get_contents('./tests/fixtures/expected_tree.txt');
         $diff = genDiff('assets/before_tree.json', 'assets/after_tree.json');
