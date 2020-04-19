@@ -2,7 +2,6 @@
 
 <?php
 
-use function Differ\gendiff\genDiff;
 use function Differ\gendiff\run;
 
 $autoloadPath1 = __DIR__ . '/../../../autoload.php';
