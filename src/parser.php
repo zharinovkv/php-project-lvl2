@@ -4,7 +4,7 @@ namespace Differ\parser;
 
 use Symfony\Component\Yaml\Yaml;
 
-const keys = ['path_before', 'path_after'];
+const KEYS = ['path_before', 'path_after'];
 
 function parser($paths)
 {
@@ -16,14 +16,14 @@ function parser($paths)
         return Yaml::parseFile($path/* , Yaml::PARSE_OBJECT_FOR_MAP */);
     };
 
-    $ext = strtolower(pathinfo($paths[keys[0]], PATHINFO_EXTENSION));
+    $ext = strtolower(pathinfo($paths[KEYS[0]], PATHINFO_EXTENSION));
 
     return array_map(${$ext}, $paths);
 }
 
 function toAst($content)
 {
-    [$before, $after] = [(array) getBeforeAfter($content, keys[0]), (array) getBeforeAfter($content, keys[1])];
+    [$before, $after] = [(array) getBeforeAfter($content, KEYS[0]), (array) getBeforeAfter($content, KEYS[1])];
 
     $unchanged = unchanged($before, $after);
     $changed =  changed($before, $after);
@@ -40,10 +40,10 @@ function unchanged($before, $after)
 
     $unchanged = array_map(function ($key, $value) {
         return ['type' => 'unchanged', 'name' => $key, 'oldValue' => $value, 'newValue' => $value];
-    }, array_keys($result), $result);
+    }, array_KEYS($result), $result);
 
     return $unchanged;
-};
+}
 
 function changed($before, $after)
 {
@@ -64,7 +64,7 @@ function changed($before, $after)
 
     $result2 = array_map(function ($key, $value) {
         return ['type' => 'changed', 'name' => $key, 'oldValue' => $value[0], 'newValue' => $value[1]];
-    }, array_keys($merged), $merged);
+    }, array_KEYS($merged), $merged);
 
     return $result2;
 }
@@ -75,7 +75,7 @@ function removed($before, $after)
 
     $result2 = array_map(function ($key, $value) {
         return ['type' => 'removed', 'name' => $key, 'oldValue' => $value, 'newValue' => ''];
-    }, array_keys($result), $result);
+    }, array_KEYS($result), $result);
 
     return $result2;
 }
@@ -86,7 +86,7 @@ function added($before, $after)
 
     $result2 = array_map(function ($key, $value) {
         return ['type' => 'added', 'name' => $key, 'oldValue' => '', 'newValue' => json_encode($value)];
-    }, array_keys($result), $result);
+    }, array_KEYS($result), $result);
 
     return $result2;
 }

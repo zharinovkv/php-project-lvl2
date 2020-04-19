@@ -5,7 +5,8 @@ namespace Differ\differ;
 use function Differ\parser\parser;
 use function Differ\parser\toAst;
 use function Differ\parser\render;
-use const Differ\parser\keys as keys;
+
+use const Differ\parser\KEYS;
 
 const ASSETS = 'assets/';
 
@@ -26,5 +27,5 @@ function getPathsToFiles(...$paths)
         return !(bool) substr_count($path, '/') ? $path = '{ASSETS}{$path}' : $path;
     }, $paths);
     //$keys = ['path_before', 'path_after'];
-    return array_combine(keys, $pathsToFiles);
+    return array_combine(KEYS, $pathsToFiles);
 }

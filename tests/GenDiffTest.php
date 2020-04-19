@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 use function Differ\differ\genDiff;
 
-
 class GenDiffTest extends TestCase
 {
     public function testGenDiff()
@@ -16,35 +15,35 @@ class GenDiffTest extends TestCase
         $this->assertEquals($expected, $diff);
     }
 
-    public function testGenDiff_2()
+    public function testGenDiff2()
     {
         $expected = file_get_contents('./tests/fixtures/expected2.txt');
         $diff = genDiff('assets/before.json', 'assets/after.json');
         $this->assertNotEquals($expected, $diff);
     }
 
-    public function testGenDiff_3()
+    public function testGenDiff3()
     {
         $expected = file_get_contents('./tests/fixtures/expected1.txt');
         $diff = genDiff('assets/before.yaml', 'assets/after.yaml');
         $this->assertEquals($expected, $diff);
     }
 
-    public function testGenDiff_4()
+    public function testGenDiff4()
     {
         $expected = file_get_contents('./tests/fixtures/expected2.txt');
         $diff = genDiff('assets/before.yaml', 'assets/after.yaml');
         $this->assertNotEquals($expected, $diff);
     }
 
-    public function testGenDiff_5()
+    public function testGenDiff5()
     {
         $expected = file_get_contents('./tests/fixtures/expected_bar.txt');
         $diff = genDiff('assets/before_bar.json', 'assets/after_bar.json');
         $this->assertNotEquals($expected, $diff);
     }
     
-    public function testGenDiff_6()
+    public function testGenDiff6()
     {
         $this->markTestIncomplete('Этот тест ещё не реализован.');
 
