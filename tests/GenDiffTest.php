@@ -5,9 +5,7 @@ namespace Differ\gendifftest;
 use PHPUnit\Framework\TestCase;
 
 use function Differ\differ\genDiff;
-use function Differ\differ\getAbsolutePathToFile;
 
-use const Differ\differ\ASSETS;
 
 class GenDiffTest extends TestCase
 {
@@ -18,54 +16,42 @@ class GenDiffTest extends TestCase
         $this->assertEquals($expected, $diff);
     }
 
-    public function testGenDiff2()
+    public function testGenDiff_2()
     {
         $expected = file_get_contents('./tests/fixtures/expected2.txt');
         $diff = genDiff('assets/before.json', 'assets/after.json');
         $this->assertNotEquals($expected, $diff);
     }
 
-    public function testGenDiff3()
+    public function testGenDiff_3()
     {
         $expected = file_get_contents('./tests/fixtures/expected1.txt');
         $diff = genDiff('assets/before.yaml', 'assets/after.yaml');
         $this->assertEquals($expected, $diff);
     }
 
-    public function testGenDiff4()
+    public function testGenDiff_4()
     {
         $expected = file_get_contents('./tests/fixtures/expected2.txt');
         $diff = genDiff('assets/before.yaml', 'assets/after.yaml');
         $this->assertNotEquals($expected, $diff);
     }
 
-    public function testGetPathToFile()
+    public function testGenDiff_5()
     {
-        $this->markTestIncomplete('Этот тест ещё не реализован.');
-        $expected = __DIR__ . 'before.yaml';
-        $path = getAbsolutePathToFile(['before', 'after']);
-        $this->assertNotEquals($expected, $path);
+        $expected = file_get_contents('./tests/fixtures/expected_bar.txt');
+        $diff = genDiff('assets/before_bar.json', 'assets/after_bar.json');
+        //print_r($diff);
+        $this->assertNotEquals($expected, $diff);
     }
-
-    public function testGetPathToFile2()
+    
+    public function testGenDiff_6()
     {
-        $this->markTestIncomplete('Этот тест ещё не реализован.');
-        $expected = ASSETS . 'before.yaml';
-        $path = getAbsolutePathToFile(['before', 'after']);
-        $this->assertEquals($expected, $path);
-        $this->markTestIncomplete(
-            'Этот тест ещё не реализован.'
-        );
-    }
+        //$this->markTestIncomplete('Этот тест ещё не реализован.');
 
-    public function testGetPathToFile3()
-    {
-        $this->markTestIncomplete('Этот тест ещё не реализован.');
-        $expected = __DIR__ . 'assets/before.yaml';
-        $path = getAbsolutePathToFile(['before', 'after']);
-        $this->assertNotEquals($expected, $path);
-        $this->markTestIncomplete(
-            'Этот тест ещё не реализован.'
-        );
+        $expected = file_get_contents('./tests/fixtures/expected_tree.txt');
+        $diff = genDiff('assets/before_tree.json', 'assets/after_tree.json');
+        //print_r($diff);
+        $this->assertNotEquals($expected, $diff);
     }
 }
