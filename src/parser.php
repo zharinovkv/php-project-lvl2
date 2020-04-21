@@ -4,26 +4,31 @@ namespace Differ\parser;
 
 use Symfony\Component\Yaml\Yaml;
 
-const KEYS = ['path_before', 'path_after'];
+const KEYS = ['path_before' => 'path_before', 'path_after' => 'path_after'];
+const TYPES = [
+    'unchanged' => 'unchanged', 'changed' => 'changed',
+    'removed' => 'removed', 'added' => 'added', 'nested' => 'nested'
+];
+const PROPS = ['type' => 'type', 'name' => 'name', 'beforeValue' => 'beforeValue', 'afterValue' => 'afterValue'];
 
-function parser($paths)
+function getContent($paths)
 {
     $json = function ($path) {
-        return json_decode(file_get_contents($path), true);
+        return json_decode(file_get_contents($path), false);
     };
 
     $yaml = function ($path) {
-        return Yaml::parseFile($path/* , Yaml::PARSE_OBJECT_FOR_MAP */);
+        return Yaml::parseFile($path, Yaml::PARSE_OBJECT_FOR_MAP);
     };
 
-    $ext = strtolower(pathinfo($paths[KEYS[0]], PATHINFO_EXTENSION));
+    $ext = strtolower(pathinfo($paths[KEYS['path_before']], PATHINFO_EXTENSION));
 
     return array_map(${$ext}, $paths);
 }
 
-function toAst($content)
+function getInnerRepresentation($content)
 {
-    [$before, $after] = [(array) getBeforeAfter($content, KEYS[0]), (array) getBeforeAfter($content, KEYS[1])];
+    [$before, $after] = [ (array)$content[KEYS['path_before']], (array)$content[KEYS['path_after']]];
 
     $unchanged = unchanged($before, $after);
     $changed =  changed($before, $after);
@@ -39,19 +44,20 @@ function unchanged($before, $after)
     $result = array_intersect($before, $after);
 
     $unchanged = array_map(function ($key, $value) {
-        return ['type' => 'unchanged', 'name' => $key, 'oldValue' => $value, 'newValue' => $value];
-    }, array_KEYS($result), $result);
+        return [PROPS['type'] => TYPES['unchanged'], PROPS['name'] => $key,
+            PROPS['beforeValue'] => $value, PROPS['afterValue'] => $value];
+    }, array_keys($result), $result);
 
     return $unchanged;
 }
 
 function changed($before, $after)
 {
-    $changedItems = function ($my_array, $allowed) {
+    $changedItems = function ($array, $filter) {
         $filtered = array_filter(
-            $my_array,
-            function ($val, $key) use ($allowed) {
-                return isset($allowed[$key]) && ($allowed[$key] === true || $allowed[$key] !== $val);
+            $array,
+            function ($val, $key) use ($filter) {
+                return isset($filter[$key]) && ($filter[$key] === true || $filter[$key] !== $val);
             },
             ARRAY_FILTER_USE_BOTH
         );
@@ -62,65 +68,61 @@ function changed($before, $after)
     $filtered2 = $changedItems($after, $before);
     $merged = array_merge_recursive($filtered1, $filtered2);
 
-    $result2 = array_map(function ($key, $value) {
-        return ['type' => 'changed', 'name' => $key, 'oldValue' => $value[0], 'newValue' => $value[1]];
-    }, array_KEYS($merged), $merged);
+    $changed = array_map(function ($key, $value) {
+        return [PROPS['type'] => TYPES['changed'], PROPS['name'] => $key,
+            PROPS['beforeValue'] => $value[0], PROPS['afterValue'] => $value[1]];
+    }, array_keys($merged), $merged);
 
-    return $result2;
+    return $changed;
 }
 
 function removed($before, $after)
 {
     $result = array_diff_key($before, $after);
 
-    $result2 = array_map(function ($key, $value) {
-        return ['type' => 'removed', 'name' => $key, 'oldValue' => $value, 'newValue' => ''];
-    }, array_KEYS($result), $result);
+    $removed = array_map(function ($key, $value) {
+        return [PROPS['type'] => TYPES['removed'], PROPS['name'] => $key,
+            PROPS['beforeValue'] => $value, PROPS['afterValue'] => ''];
+    }, array_keys($result), $result);
 
-    return $result2;
+    return $removed;
 }
 
 function added($before, $after)
 {
     $result = array_diff_key($after, $before);
 
-    $result2 = array_map(function ($key, $value) {
-        return ['type' => 'added', 'name' => $key, 'oldValue' => '', 'newValue' => json_encode($value)];
-    }, array_KEYS($result), $result);
+    $added = array_map(function ($key, $value) {
+        return [PROPS['type'] => TYPES['added'], PROPS['name'] => $key,
+            PROPS['beforeValue'] => '', PROPS['afterValue'] => json_encode($value)];
+    }, array_keys($result), $result);
 
-    return $result2;
+    return $added;
 }
 
-function getBeforeAfter($content, $index)
+function toString($ast)
 {
-    return $content[$index];
-}
-
-function render($ast)
-{
-    //var_dump($ast);
-
     $types = [
-        'unchanged' => function ($value) {
-            return "  {$value['name']}: {$value['oldValue']}";
+        TYPES['unchanged'] => function ($value) {
+            return "  {$value[PROPS['name']]}: {$value[PROPS['beforeValue']]}";
         },
-        'changed' => function ($value) {
-            return "+ {$value['name']}: {$value['newValue']}\n- {$value['name']}: {$value['oldValue']}";
+        TYPES['changed'] => function ($value) {
+            return "+ {$value[PROPS['name']]}: {$value[PROPS['afterValue']]}\n" .
+                "- {$value['name']}: {$value[PROPS['beforeValue']]}";
         },
-        'removed' => function ($value) {
-            return "- {$value['name']}: {$value['oldValue']}";
+        TYPES['removed'] => function ($value) {
+            return "- {$value[PROPS['name']]}: {$value[PROPS['beforeValue']]}";
         },
-        'added' => function ($value) {
-            return "+ {$value['name']}: {$value['newValue']}";
+        TYPES['added'] => function ($value) {
+            return "+ {$value[PROPS['name']]}: {$value[PROPS['afterValue']]}";
         },
-        'nested' => function ($value) {
+        TYPES['nested'] => function ($value) {
             return 'nested';
         },
     ];
 
     $result = array_map(function ($value) use ($types) {
-        return $types[$value['type']]($value);
+        return $types[$value[PROPS['type']]]($value);
     }, $ast);
-
     return "{\n" . join("\n", $result) . "\n}\n";
 }
