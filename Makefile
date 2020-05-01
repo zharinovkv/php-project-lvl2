@@ -4,6 +4,9 @@ install:
 lint:
 	composer run-script phpcs -- --standard=PSR12 src tests
 
+lint-fix:
+	composer run-script phpcbf -- --standard=PSR12 src tests
+
 test:
 	composer run-script phpunit tests
 
@@ -21,3 +24,5 @@ g2:
 
 g3:
 	bin/gendiff assets/before_tree.json assets/after_tree.json
+
+
