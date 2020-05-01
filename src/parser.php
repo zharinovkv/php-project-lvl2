@@ -37,6 +37,14 @@ function getBeforeAndAfter($content)
     return [$content[KEYS['path_before']], $content[KEYS['path_after']]];
 }
 
+function createItem($type, $name, $beforeValue = null, $afterValue = null, $children = null)
+{
+    return [
+        PROPS['type'] => $type, PROPS['name'] => $name,
+        PROPS['beforeValue'] => json_encode($beforeValue), PROPS['afterValue'] => json_encode($afterValue),
+        PROPS['children'] => $children];
+}
+
 function getInnerRepresentation($before, $after)
 {
     //$both_files_properties = array_merge(array_keys($before), array_keys($after));
@@ -48,9 +56,9 @@ function getInnerRepresentation($before, $after)
     $keys = array_keys(array_merge($before, $after));
     //print_r($keys);
     //print_r($before);
-    //print_r($after);    
+    //print_r($after);
 
-    $mapped = array_map(function ($key) use ($before, $after) {
+    $mapper = function ($key) use ($before, $after) {
 
         if (isset($before[$key]) && !isset($after[$key])) {
             return [
@@ -86,19 +94,10 @@ function getInnerRepresentation($before, $after)
                 }
             }
         }
+    };
 
-
-        /*   print_r($before);
-        print_r($after);
-        print_r($before[$key]);
-        print_r($after[$key]);
-       */  
-
-
-    }, $keys);
-
-    $m = $mapped;
-    print_r($m);
+    $mapped = array_map($mapper, $keys);    
+    print_r($mapped);
 
     return [];
 }
