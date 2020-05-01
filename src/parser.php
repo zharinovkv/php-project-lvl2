@@ -55,31 +55,34 @@ function getInnerRepresentation($before, $after)
         if (isset($before[$key]) && !isset($after[$key])) {
             return [
                 PROPS['type'] => TYPES['removed'], PROPS['name'] => $key,
-                PROPS['beforeValue'] => $before[$key], PROPS['afterValue'] => ''];
+                PROPS['beforeValue'] => json_encode($before[$key]), PROPS['afterValue'] => null];
         }
         
         if (!isset($before[$key]) && isset($after[$key])) {
             return [
                 PROPS['type'] => TYPES['added'], PROPS['name'] => $key,
-                PROPS['beforeValue'] => '', PROPS['afterValue'] => json_encode($after[$key])];
+                PROPS['beforeValue'] => null, PROPS['afterValue'] => json_encode($after[$key])];
         }
 
         if(isset($before[$key]) && isset($after[$key])) {
 
             if (is_array($before[$key]) && is_array($after[$key])) {
-                echo  'children';
-                return ['children' => getInnerRepresentation($before[$key], $after[$key])];
+                
+                return [
+                    PROPS['type'] => TYPES['nested'], PROPS['name'] => $key,
+                    PROPS['beforeValue'] => null, PROPS['afterValue'] => null,                
+                    PROPS['children'] => getInnerRepresentation($before[$key], $after[$key])];
             } else {
                 if ($before[$key] === $after[$key]) {
                     return [
                         PROPS['type'] => TYPES['unchanged'], PROPS['name'] => $key,
-                        PROPS['beforeValue'] => $before[$key], PROPS['afterValue'] => $after[$key]];
+                        PROPS['beforeValue'] => json_encode($before[$key]), PROPS['afterValue'] => json_encode($after[$key])];
                 }
         
                 if ($before[$key] !== $after[$key]) {
                     return [
                         PROPS['type'] => TYPES['changed'], PROPS['name'] => $key,
-                        PROPS['beforeValue'] => $before[$key], PROPS['afterValue'] => $after[$key]];
+                        PROPS['beforeValue'] => json_encode($before[$key]), PROPS['afterValue'] => json_encode($after[$key])];
                 }
             }
         }
@@ -97,84 +100,9 @@ function getInnerRepresentation($before, $after)
     $m = $mapped;
     print_r($m);
 
-
-/*     $unchanged = unchanged($before, $after);
-    $changed =  changed($before, $after);
-    $removed =  removed($before, $after);
-    $added =  added($before, $after);
-
-    $result = array_merge($unchanged, $changed, $removed, $added);
-    //print_r($result);
-
-    return $result; */
     return [];
 }
 
-function unchanged($before, $after)
-{
-    $result = array_intersect($before, $after);
-
-    $unchanged = array_map(function ($key, $value) {
-        return [
-                PROPS['type'] => TYPES['unchanged'],
-                PROPS['name'] => $key,
-                PROPS['beforeValue'] => $value, 
-                PROPS['afterValue'] => $value
-            ];
-    }, array_keys($result), $result);
-
-    return $unchanged;
-}
-
-function changed($before, $after)
-{
-    $changedItems = function ($array, $filter) {
-        $filtered = array_filter(
-            $array,
-            function ($val, $key) use ($filter) {
-                return isset($filter[$key]) && ($filter[$key] === true || $filter[$key] !== $val);
-            },
-            ARRAY_FILTER_USE_BOTH
-        );
-        return $filtered;
-    };
-
-    $filtered1 = $changedItems($before, $after);
-    $filtered2 = $changedItems($after, $before);
-    $merged = array_merge_recursive($filtered1, $filtered2);
-
-    $changed = array_map(function ($key, $value) {
-        print_r($value);
-        return [PROPS['type'] => TYPES['changed'], PROPS['name'] => $key,
-            PROPS['beforeValue'] => $value, PROPS['afterValue'] => $value];
-    }, array_keys($merged), $merged);
-
-    return $changed;
-}
-
-function removed($before, $after)
-{
-    $result = array_diff_key($before, $after);
-
-    $removed = array_map(function ($key, $value) {
-        return [PROPS['type'] => TYPES['removed'], PROPS['name'] => $key,
-            PROPS['beforeValue'] => $value, PROPS['afterValue'] => ''];
-    }, array_keys($result), $result);
-
-    return $removed;
-}
-
-function added($before, $after)
-{
-    $result = array_diff_key($after, $before);
-
-    $added = array_map(function ($key, $value) {
-        return [PROPS['type'] => TYPES['added'], PROPS['name'] => $key,
-            PROPS['beforeValue'] => '', PROPS['afterValue'] => json_encode($value)];
-    }, array_keys($result), $result);
-
-    return $added;
-}
 
 function toString($ast)
 {
