@@ -5,6 +5,7 @@ namespace Differ\differ;
 use function Differ\parser\getContent;
 use function Differ\parser\getInnerRepresentation;
 use function Differ\parser\toString;
+use function Differ\parser\getBeforeAndAfter;
 
 use const Differ\parser\KEYS;
 
@@ -15,7 +16,11 @@ function genDiff($path_before, $path_after)
     $paths = getPathsToFiles($path_before, $path_after);
 
     $content = getContent($paths);
-    $ast = getInnerRepresentation($content);
+
+    [$before, $after] = getBeforeAndAfter($content);
+
+    $ast = getInnerRepresentation($before, $after);
+
     $str = toString($ast);
 
     return $str;
