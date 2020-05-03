@@ -3,7 +3,6 @@
 namespace Differ\parser;
 
 use Symfony\Component\Yaml\Yaml;
-use Funct\Collection\flatten;
 
 const KEYS = ['path_before' => 'path_before', 'path_after' => 'path_after'];
 const TYPES = [
@@ -13,14 +12,14 @@ const TYPES = [
 ];
 const PROPS = [
     'type' => 'type', 'name' => 'name',
-    'beforeValue' => 'beforeValue', 'afterValue' => 'afterValue',
+    'beforeValue' => 'before', 'afterValue' => 'after',
     'children' => 'children'
 ];
 
 function getContent($paths)
 {
     $json = function ($path) {
-        return json_decode(file_get_contents($path), true);
+        return json_decode(file_get_contents($path), false);
     };
 
     $yaml = function ($path) {
@@ -37,95 +36,93 @@ function getBeforeAndAfter($content)
     return [$content[KEYS['path_before']], $content[KEYS['path_after']]];
 }
 
-function createItem($type, $name, $beforeValue = null, $afterValue = null, $children = null)
+function getAst($before, $after)
 {
-    return [
-        PROPS['type'] => $type, PROPS['name'] => $name,
-        PROPS['beforeValue'] => json_encode($beforeValue), PROPS['afterValue'] => json_encode($afterValue),
-        PROPS['children'] => $children];
-}
-
-function getInnerRepresentation($before, $after)
-{
-    //$both_files_properties = array_merge(array_keys($before), array_keys($after));
-    //print_r($both_files_properties);
-/*     
-    print_r(array_merge($before, $after));
-    print_r(array_keys(array_merge($before, $after)));
-    print_r(array_unique(array_keys(array_merge($before, $after)))); */
-    $keys = array_keys(array_merge($before, $after));
-    //print_r($keys);
-    //print_r($before);
-    //print_r($after);
+    $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
 
     $mapper = function ($key) use ($before, $after) {
 
-        if (isset($before[$key]) && !isset($after[$key])) {
-            return [
-                PROPS['type'] => TYPES['removed'], PROPS['name'] => $key,
-                PROPS['beforeValue'] => json_encode($before[$key]), PROPS['afterValue'] => null];
-        }
-        
-        if (!isset($before[$key]) && isset($after[$key])) {
-            return [
-                PROPS['type'] => TYPES['added'], PROPS['name'] => $key,
-                PROPS['beforeValue'] => null, PROPS['afterValue'] => json_encode($after[$key])];
-        }
-
-        if(isset($before[$key]) && isset($after[$key])) {
-
-            if (is_array($before[$key]) && is_array($after[$key])) {
-                
+        if (property_exists($before, $key) && property_exists($after, $key)) {
+            if (is_object($before->$key) && is_object($after->$key)) {
                 return [
-                    PROPS['type'] => TYPES['nested'], PROPS['name'] => $key,
-                    PROPS['beforeValue'] => null, PROPS['afterValue'] => null,                
-                    PROPS['children'] => getInnerRepresentation($before[$key], $after[$key])];
+                    PROPS['type'] => TYPES['nested'],
+                    PROPS['name'] => $key,
+                    PROPS['children'] => getAst($before->$key, $after->$key)
+                ];
             } else {
-                if ($before[$key] === $after[$key]) {
-                    return [
-                        PROPS['type'] => TYPES['unchanged'], PROPS['name'] => $key,
-                        PROPS['beforeValue'] => json_encode($before[$key]), PROPS['afterValue'] => json_encode($after[$key])];
-                }
-        
-                if ($before[$key] !== $after[$key]) {
-                    return [
-                        PROPS['type'] => TYPES['changed'], PROPS['name'] => $key,
-                        PROPS['beforeValue'] => json_encode($before[$key]), PROPS['afterValue'] => json_encode($after[$key])];
+                if ($before->$key === $after->$key) {
+                    return  [
+                        PROPS['type'] => TYPES['unchanged'],
+                        PROPS['name'] => $key,
+                        PROPS['beforeValue'] => $before->$key,
+                        PROPS['afterValue'] => $after->$key
+                    ];
+                } elseif ($before->$key !== $after->$key) {
+                    return  [
+                        PROPS['type'] => TYPES['changed'],
+                        PROPS['name'] => $key,
+                        PROPS['beforeValue'] => $before->$key,
+                        PROPS['afterValue'] => $after->$key
+                    ];
                 }
             }
+        } elseif (property_exists($before, $key) && !property_exists($after, $key)) {
+            return  [
+                PROPS['type'] => TYPES['removed'],
+                PROPS['name'] => $key,
+                PROPS['beforeValue'] => $before->$key
+            ];
+        } elseif (!property_exists($before, $key) && property_exists($after, $key)) {
+            return  [
+                PROPS['type'] => TYPES['added'],
+                PROPS['name'] => $key,
+                PROPS['afterValue'] => $after->$key
+            ];
         }
     };
 
-    $mapped = array_map($mapper, $keys);    
-    print_r($mapped);
-
-    return [];
+    $mapped = array_map($mapper, $keys);
+    return $mapped;
 }
 
 
 function toString($ast)
 {
+
+
     $types = [
         TYPES['unchanged'] => function ($value) {
             return "  {$value[PROPS['name']]}: {$value[PROPS['beforeValue']]}";
         },
         TYPES['changed'] => function ($value) {
-            return "+ {$value[PROPS['name']]}: {$value[PROPS['afterValue']]}\n" .
+            return  "+ {$value[PROPS['name']]}: {$value[PROPS['afterValue']]}\n" .
                 "- {$value['name']}: {$value[PROPS['beforeValue']]}";
         },
         TYPES['removed'] => function ($value) {
-            return "- {$value[PROPS['name']]}: {$value[PROPS['beforeValue']]}";
+            $item = json_encode($value[PROPS['beforeValue']]);
+            return "- {$value[PROPS['name']]}: {$item}";
         },
         TYPES['added'] => function ($value) {
-            return "+ {$value[PROPS['name']]}: {$value[PROPS['afterValue']]}";
+            $item = json_encode($value[PROPS['afterValue']]);
+            return "+ {$value[PROPS['name']]}: {$item}";
         },
         TYPES['nested'] => function ($value) {
-            return 'nested';
+            //print_r($value);
+
+            return [
+                $value[PROPS['name']] => toString($value[PROPS['children']])
+            ];
         },
     ];
 
-    $result = array_map(function ($value) use ($types) {
-        return $types[$value[PROPS['type']]]($value);
-    }, $ast);
-    return "{\n" . join("\n", $result) . "\n}\n";
+    $mapper = function ($acc, $child) use (&$mapper, $types) {
+        $acc[] = $types[$child[PROPS['type']]]($child);
+        return $acc;
+    };
+
+    $result = array_reduce($ast, $mapper, []);
+
+    print_r($result);
+
+    //return "{\n" . join("\n", $result) . "\n}\n";
 }
