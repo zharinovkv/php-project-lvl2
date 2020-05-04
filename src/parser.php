@@ -36,7 +36,7 @@ function splitOnBeforeAndAfter($content)
     return [$content[KEYS['path_before']], $content[KEYS['path_after']]];
 }
 
-function createItem($type, $key, $beforeValue = null, $afterValue = null, $children = null)
+function createItem($type, $key, $beforeValue, $afterValue, $children = null)
 {
     $item = [
         PROPS['type'] => $type,
@@ -55,7 +55,7 @@ function getAst($before, $after)
     $mapper = function ($key) use ($before, $after) {
         if (property_exists($before, $key) && property_exists($after, $key)) {
             if (is_object($before->$key) && is_object($after->$key)) {
-                return createItem(TYPES['nested'], $key, $children = getAst($before->$key, $after->$key));
+                return createItem(TYPES['nested'], $key, null, null, getAst($before->$key, $after->$key));
             } else {
                 if ($before->$key === $after->$key) {
                     return createItem(TYPES['unchanged'], $key, $before->$key, $after->$key);
@@ -64,7 +64,7 @@ function getAst($before, $after)
                 }
             }
         } elseif (!property_exists($after, $key)) {
-            return createItem(TYPES['removed'], $key, $before->$key);
+            return createItem(TYPES['removed'], $key, $before->$key, null);
         } elseif (!property_exists($before, $key)) {
             return createItem(TYPES['added'], $key, null, $after->$key);
         }
@@ -74,87 +74,48 @@ function getAst($before, $after)
     return $mapped;
 }
 
-function toString($ast)
+function toDiff($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
-            $value = gettype(true) == "boolean" ? json_encode($item[PROPS['beforeValue']]) : $item[PROPS['beforeValue']];
+            $value = json_encode($item[PROPS['beforeValue']]);
             return "  {$item[PROPS['name']]}: {$value}";
         },
         TYPES['changed'] => function ($item) {
-            $before = gettype(true) == "boolean" ? json_encode($item[PROPS['beforeValue']]) : $item[PROPS['beforeValue']];
-            $after = gettype(true) == "boolean" ? json_encode($item[PROPS['afterValue']]) : $item[PROPS['afterValue']];
+            $before = json_encode($item[PROPS['beforeValue']]);
+            $after = json_encode($item[PROPS['afterValue']]);
             return  "+ {$item[PROPS['name']]}: {$after}\n- {$item[PROPS['name']]}: {$before}";
         },
         TYPES['removed'] => function ($item) {
-            $value = gettype(true) == "boolean" ? json_encode($item[PROPS['beforeValue']]) : $item[PROPS['beforeValue']];
+            $value =  json_encode($item[PROPS['beforeValue']]);
             return "- {$item[PROPS['name']]}: {$value}";
         },
         TYPES['added'] => function ($item) {
-            $value = gettype(true) == "boolean" ? json_encode($item[PROPS['afterValue']]) : $item[PROPS['afterValue']];
+            $value = json_encode($item[PROPS['afterValue']]);
             return "+ {$item[PROPS['name']]}: {$value}";
         },
         TYPES['nested'] => function ($item) {
-            return [$item[PROPS['name']] => toString($item[PROPS['children']])];
+            return [$item['name'] => toDiff($item[PROPS['children']])];
         },
     ];
 
     $mapper = function ($child) use ($types) {
-        return $types[$child[PROPS['type']]]($child);
+        $item = $types[$child[PROPS['type']]]($child);
+        return $item;
     };
     $result = array_map($mapper, $ast);
     return $result;
 }
 
-
-function toString2($ast)
+function toString($arr)
 {
-    $types = [
-        TYPES['unchanged'] => function ($item) {
-            $value = gettype(true) == "boolean" ? json_encode($item[PROPS['beforeValue']]) : $item[PROPS['beforeValue']];
-            return "  {$item[PROPS['name']]}: {$value}";
-        },
-        TYPES['changed'] => function ($item) {
-
-            $before = gettype(true) == "boolean" ? json_encode($item[PROPS['beforeValue']]) : $item[PROPS['beforeValue']];
-            $after = gettype(true) == "boolean" ? json_encode($item[PROPS['afterValue']]) : $item[PROPS['afterValue']];
-
-            return  "+ {$item[PROPS['name']]}: {$after}\n- {$item[PROPS['name']]}: {$before}";
-        },
-        TYPES['removed'] => function ($item) {
-            $value = gettype(true) == "boolean" ? json_encode($item[PROPS['beforeValue']]) : $item[PROPS['beforeValue']];
-            return "- {$item[PROPS['name']]}: {$value}";
-        },
-        TYPES['added'] => function ($item) {
-            $value = gettype(true) == "boolean" ? json_encode($item[PROPS['afterValue']]) : $item[PROPS['afterValue']];
-            return "+ {$item[PROPS['name']]}: {$value}";
-        },
-        TYPES['nested'] => function ($item) {
-            return [$item[PROPS['name']] => toString($item[PROPS['children']])];
-        },
-    ];
-
-    $mapper = function ($acc, $child) use ($types, &$mapper) {
-
-        $item = $types[$child[PROPS['type']]]($child);
-        return "{$acc}{$item}\n";
-    };
-
-    $result = array_reduce($ast, $mapper, "{\n");
-
-    return $result . "}\n";
-}
-
-function render($arr)
-{
-    $keys = array_keys($arr);
-
-    $mapper = function ($acc, $child) use (&$mapper) {
+    $mapper = function ($acc, $child) {
         $item = str_replace("\"", "", $child);
-        return "{$acc}{$item}\n";
+        $acc[] = $item;
+        return $acc;
     };
 
-    $result = array_reduce($arr, $mapper, "{\n");
-
-    return $result . "}\n";
+    $result = array_reduce($arr, $mapper, []);
+    $joined = join("\n", $result);
+    return "{\n{$joined}\n}\n";
 }
