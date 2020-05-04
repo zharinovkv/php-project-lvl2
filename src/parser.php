@@ -53,21 +53,20 @@ function getAst($before, $after)
     $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
 
     $mapper = function ($key) use ($before, $after) {
-
         if (property_exists($before, $key) && property_exists($after, $key)) {
             if (is_object($before->$key) && is_object($after->$key)) {
                 return createItem(TYPES['nested'], $key, $children = getAst($before->$key, $after->$key));
             } else {
                 if ($before->$key === $after->$key) {
-                    return createItem(TYPES['unchanged'], $key, $beforeValue = $before->$key, $afterValue = $after->$key);
+                    return createItem(TYPES['unchanged'], $key, $before->$key, $after->$key);
                 } elseif ($before->$key !== $after->$key) {
-                    return createItem(TYPES['changed'], $key, $beforeValue = $before->$key, $afterValue = $after->$key);
+                    return createItem(TYPES['changed'], $key, $before->$key, $after->$key);
                 }
             }
         } elseif (!property_exists($after, $key)) {
-            return createItem(TYPES['removed'], $key, $beforeValue = $before->$key);
+            return createItem(TYPES['removed'], $key, $before->$key);
         } elseif (!property_exists($before, $key)) {
-            return createItem(TYPES['added'], $key, $beforeValue = null, $afterValue = $after->$key);
+            return createItem(TYPES['added'], $key, null, $after->$key);
         }
     };
 
