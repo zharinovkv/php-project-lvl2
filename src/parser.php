@@ -53,6 +53,7 @@ function getAst($before, $after)
     $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
 
     $mapper = function ($key) use ($before, $after) {
+
         if (property_exists($before, $key) && property_exists($after, $key)) {
             if (is_object($before->$key) && is_object($after->$key)) {
                 return createItem(TYPES['nested'], $key, $children = getAst($before->$key, $after->$key));
@@ -63,9 +64,9 @@ function getAst($before, $after)
                     return createItem(TYPES['changed'], $key, $beforeValue = $before->$key, $afterValue = $after->$key);
                 }
             }
-        } elseif (property_exists($before, $key) && !property_exists($after, $key)) {
+        } elseif (!property_exists($after, $key)) {
             return createItem(TYPES['removed'], $key, $beforeValue = $before->$key);
-        } elseif (!property_exists($before, $key) && property_exists($after, $key)) {
+        } elseif (!property_exists($before, $key)) {
             return createItem(TYPES['added'], $key, $beforeValue = null, $afterValue = $after->$key);
         }
     };
