@@ -25,4 +25,7 @@ g2:
 g3:
 	bin/gendiff assets/before_tree.json assets/after_tree.json
 
+gp:
+	bin/gendiff --format plain assets/before.json assets/after.json
+
 
