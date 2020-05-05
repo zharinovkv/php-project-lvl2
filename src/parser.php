@@ -3,6 +3,7 @@
 namespace Differ\parser;
 
 use Symfony\Component\Yaml\Yaml;
+use function Funct\Collection\flatten;
 
 const KEYS = ['path_before' => 'path_before', 'path_after' => 'path_after'];
 const TYPES = [
@@ -43,7 +44,6 @@ function createItem($type, $key, $beforeValue, $afterValue, $children = null)
         PROPS['name'] => $key,
         PROPS['beforeValue'] => $beforeValue,
         PROPS['afterValue'] => $afterValue,
-        PROPS['children'] => $children,
     ];
     return $item;
 }
@@ -55,7 +55,9 @@ function getAst($before, $after)
     $mapper = function ($key) use ($before, $after) {
         if (property_exists($before, $key) && property_exists($after, $key)) {
             if (is_object($before->$key) && is_object($after->$key)) {
-                return createItem(TYPES['nested'], $key, null, null, getAst($before->$key, $after->$key));
+                $item = createItem(TYPES['nested'], $key, null, null);
+                $item[PROPS['children']] = getAst($before->$key, $after->$key);
+                return $item;
             } else {
                 if ($before->$key === $after->$key) {
                     return createItem(TYPES['unchanged'], $key, $before->$key, $after->$key);
@@ -74,48 +76,58 @@ function getAst($before, $after)
     return $mapped;
 }
 
-function toDiff($ast)
+function toDiff2($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
-            $value = json_encode($item[PROPS['beforeValue']]);
+            $value = $item[PROPS['beforeValue']];
             return "  {$item[PROPS['name']]}: {$value}";
         },
         TYPES['changed'] => function ($item) {
-            $before = json_encode($item[PROPS['beforeValue']]);
-            $after = json_encode($item[PROPS['afterValue']]);
-            return  "+ {$item[PROPS['name']]}: {$after}\n- {$item[PROPS['name']]}: {$before}";
+            $before = $item[PROPS['beforeValue']];
+            $after = $item[PROPS['afterValue']];
+            $item[PROPS['name']] = ["+ {$item[PROPS['name']]}: {$after}\n", "- {$item[PROPS['name']]}: {$before}\n"];
+            return $item[PROPS['name']];
         },
         TYPES['removed'] => function ($item) {
-            $value =  json_encode($item[PROPS['beforeValue']]);
+            $value =  $item[PROPS['beforeValue']];
+            if (is_object($value)) {
+                $value = get_object_vars($value);
+                $firstKey = array_key_first($value);
+                $v = $value[$firstKey];
+                $value = "{\n        {$firstKey}: {$v}}";
+            }
             return "- {$item[PROPS['name']]}: {$value}";
         },
         TYPES['added'] => function ($item) {
-            $value = json_encode($item[PROPS['afterValue']]);
+            $value = $item[PROPS['afterValue']];
+            if (is_object($value)) {
+                $value = get_object_vars($value);
+                $firstKey = array_key_first($value);
+                $v = $value[$firstKey];
+                $value = "{\n        {$firstKey}: {$v}}";
+            }
+            if(is_bool($value)) {
+                $value = json_encode($value);
+            }
             return "+ {$item[PROPS['name']]}: {$value}";
         },
         TYPES['nested'] => function ($item) {
-            return [$item['name'] => toDiff($item[PROPS['children']])];
+            return [$item[PROPS['name']] => toDiff2($item[PROPS['children']])];
         },
     ];
 
-    $mapper = function ($child) use ($types) {
+    $mapper = function ($acc, $child) use ($types) {
         $item = $types[$child[PROPS['type']]]($child);
-        return $item;
+        if (is_string($item)) {
+            return "{$acc}{$item}\n";
+        } else {
+            $key = array_key_first($item);
+            $flattened = flatten($item);
+            $joined = join("", $flattened);
+            return $key === 0 ? "{$acc}{$joined}" : "{$acc}{$key}{$joined}"; 
+        }
     };
-    $result = array_map($mapper, $ast);
-    return $result;
-}
-
-function toString($arr)
-{
-    $mapper = function ($acc, $child) {
-        $item = str_replace("\"", "", $child);
-        $acc[] = $item;
-        return $acc;
-    };
-
-    $result = array_reduce($arr, $mapper, []);
-    $joined = join("\n", $result);
-    return "{\n{$joined}\n}\n";
+    $result = array_reduce($ast, $mapper, '');
+    return "{\n{$result}}\n";
 }
