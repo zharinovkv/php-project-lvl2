@@ -76,7 +76,7 @@ function getAst($before, $after)
     return $mapped;
 }
 
-function toDiff2($ast)
+function toDiff($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
@@ -113,7 +113,7 @@ function toDiff2($ast)
             return "+ {$item[PROPS['name']]}: {$value}";
         },
         TYPES['nested'] => function ($item) {
-            return [$item[PROPS['name']] => toDiff2($item[PROPS['children']])];
+            return [$item[PROPS['name']] => toDiff($item[PROPS['children']])];
         },
     ];
 
