@@ -45,7 +45,6 @@ class GenDiffTest extends TestCase
     
     public function testGenDiff6()
     {
-        $this->markTestIncomplete('Этот тест ещё не реализован.');
         $expected = file_get_contents('./tests/fixtures/expected_tree.txt');
         $diff = genDiff('assets/before_tree.json', 'assets/after_tree.json');
         $this->assertEquals($expected, $diff);
