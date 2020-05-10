@@ -1,13 +1,11 @@
 <?php
-
 namespace Differ\parser;
 
 use Symfony\Component\Yaml\Yaml;
 
-use const Differ\Formatters\silence\TYPES;
-use const Differ\Formatters\silence\PROPS;
-
-const KEYS = ['path_before' => 'path_before', 'path_after' => 'path_after'];
+use const Differ\settings\TYPES;
+use const Differ\settings\PROPS;
+use const Differ\settings\KEYS;
 
 function getContent($paths)
 {
