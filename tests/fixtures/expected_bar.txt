@@ -1,9 +1,9 @@
 {
-  host: hexlet.io
-+ timeout: 20
-- timeout: 50
-- proxy: 123.234.53.22
-+ bar: baz
-- bar: 100
-+ verbose: true
+    host: hexlet.io
+  + timeout: 20
+  - timeout: 50
+  - proxy: 123.234.53.22
+  + bar: baz
+  - bar: 100
+  + verbose: true
 }
