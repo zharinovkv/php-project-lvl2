@@ -1,10 +1,10 @@
 <?php
+
 namespace Differ\differ;
 
 use function Differ\parser\getContent;
 use function Differ\parser\splitOnBeforeAndAfter;
 use function Differ\parser\getAst;
-
 use function Differ\Formatters\bydefault\toDiff;
 use function Differ\Formatters\bydefault\toString;
 

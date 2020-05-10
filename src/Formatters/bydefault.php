@@ -63,16 +63,12 @@ function toDiff($ast)
         if ($child[PROPS['type']] === TYPES['nested']) {
             $acc[] = [$space . $child['name'] => toDiff($child['children'])];
             return $acc;
-        }
-
-        if ($child[PROPS['type']] === TYPES['changed']) {
+        } elseif ($child[PROPS['type']] === TYPES['changed']) {
             $items = explode(',', $item);
             $acc[] = $items[0];
             $acc[] = $items[1];
             return $acc;
-        }
-
-        if ($child[PROPS['type']] === TYPES['unchanged'] || $child[PROPS['type']] === TYPES['added'] || $child[PROPS['type']] === TYPES['removed']) {
+        } else {
             $acc[] = $item;
             return $acc;
         }
@@ -84,11 +80,11 @@ function toDiff($ast)
 
 function toString($arr)
 {
-    $mapper = function ($acc, $child) {        
+    $mapper = function ($acc, $child) {
         if (is_string($child)) {
             $acc[] = $child;
             return $acc;
-        } elseif  (is_array($child))  {
+        } elseif (is_array($child)) {
             $key = array_key_first($child);
             $flattened = flatten($child);
             $joined = implode("\n", $flattened);

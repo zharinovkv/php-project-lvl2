@@ -1,4 +1,5 @@
 <?php
+
 namespace Differ\parser;
 
 use Symfony\Component\Yaml\Yaml;
@@ -47,7 +48,14 @@ function getAst($before, $after, $depth)
     $mapper = function ($key) use ($before, $after, $depth) {
         if (property_exists($before, $key) && property_exists($after, $key)) {
             if (is_object($before->$key) && is_object($after->$key)) {
-                $item = createItem(TYPES['nested'], $key, null, null, $depth, getAst($before->$key, $after->$key, $depth + 1));
+                $item = createItem(
+                    TYPES['nested'],
+                    $key,
+                    null,
+                    null,
+                    $depth,
+                    getAst($before->$key, $after->$key, $depth + 1)
+                );
                 return $item;
             } else {
                 if ($before->$key === $after->$key) {

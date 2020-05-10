@@ -37,7 +37,7 @@
             "src/gendiff.php",
             "src/parser.php",
             "src/differ.php",
-            "src/Formatters/silence.php",
+            "src/Formatters/bydefault.php",
             "src/Formatters/plain.php",
             "src/Formatters/json.php",
             "src/settings.php"
