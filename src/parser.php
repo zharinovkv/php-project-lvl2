@@ -41,7 +41,7 @@ function createItem($type, $key, $beforeValue, $afterValue, $depth, $children)
     return $item;
 }
 
-function getAst($before, $after, $depth)
+function getAst($before, $after, $depth = 1)
 {
     $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
 
@@ -54,7 +54,7 @@ function getAst($before, $after, $depth)
                     null,
                     null,
                     $depth,
-                    getAst($before->$key, $after->$key, $depth + 1)
+                    getAst($before->$key, $after->$key, $depth + 1, $key)
                 );
                 return $item;
             } else {

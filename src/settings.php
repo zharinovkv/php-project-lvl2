@@ -23,5 +23,5 @@ const TYPES = [
 const PROPS = [
     'type' => 'type', 'name' => 'name',
     'beforeValue' => 'before', 'afterValue' => 'after',
-    'children' => 'children', 'depth' => 'depth',
+    'children' => 'children', 'depth' => 'depth'
 ];

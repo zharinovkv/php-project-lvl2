@@ -24,6 +24,7 @@ Usage:
 DOCOPT;
 
     $result = Docopt::handle($doc, array('version' => '0.0.1'));
-    $diff = genDiff($result->args["<firstFile>"], $result->args["<secondFile>"]);
+    $diff = genDiff($result->args["<firstFile>"], $result->args["<secondFile>"], $result->args["--format"]);
     echo $diff;
+    echo PHP_EOL;
 }

@@ -31,7 +31,7 @@ function createItem($item, $resume)
     }
 }
 
-function toDiff($ast)
+function render($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
@@ -47,7 +47,7 @@ function toDiff($ast)
             return createItem($item, 'added');
         },
         TYPES['nested'] => function ($item) {
-            return [$item[PROPS['name']] => toDiff($item[PROPS['children']])];
+            return render($item[PROPS['children']]);
         },
     ];
 
@@ -56,12 +56,12 @@ function toDiff($ast)
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
-            $acc[] = [$child['name'] => toDiff($child['children'])];
+            $acc[] = [$child['name'] => render($child['children'])];
             return $acc;
         } elseif ($child[PROPS['type']] === TYPES['changed']) {
             $acc[] = $item;
             return $acc;
-        } elseif ($child[PROPS['type']] === TYPES['unchanged'] ||  $child[PROPS['type']] === TYPES['added'] || $child[PROPS['type']] === TYPES['removed']) {
+        } else {
             $acc[] = $item;
             return $acc;
         }
@@ -71,8 +71,9 @@ function toDiff($ast)
     return $result;
 }
 
-function toString($arr)
+function toString($array)
 {
+
     $mapper = function ($acc, $child) {
         if (is_string($child)) {
             $acc[] = "Property '{$child}";
@@ -92,7 +93,8 @@ function toString($arr)
         }
     };
 
-    $result = array_reduce($arr, $mapper, []);
-    $joined = join("\n", $result);
-    return "{$joined}\n";
+        $result2 = array_reduce($array, $mapper, []);
+    
+        $joined = join("\n", $result2);
+        return "{$joined}";
 }
