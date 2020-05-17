@@ -1,6 +1,6 @@
 <?php
 
-namespace Differ\Formatters\bydefault;
+namespace Differ\Formatters\pretty;
 
 use function Funct\Collection\flatten;
 
@@ -32,7 +32,7 @@ function createItem($item, $index, $pluse = PLUSE, $minus = MINUS, $blank = BLAN
     return "{$space}  {$pluse}{$minus}{$blank} {$item[PROPS['name']]}: {$value}";
 }
 
-function toDiff($ast)
+function render($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
@@ -50,7 +50,7 @@ function toDiff($ast)
             return createItem($item, 'afterValue', PLUSE, null, null);
         },
         TYPES['nested'] => function ($item) {
-            return [$item[PROPS['name']] => toDiff($item[PROPS['children']])];
+            return render($item[PROPS['children']]);
         },
     ];
 
@@ -61,7 +61,7 @@ function toDiff($ast)
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
-            $acc[] = [$space . $child['name'] => toDiff($child['children'])];
+            $acc[] = [$space . $child['name'] => render($child['children'])];
             return $acc;
         } elseif ($child[PROPS['type']] === TYPES['changed']) {
             $items = explode(',', $item);
@@ -78,7 +78,7 @@ function toDiff($ast)
     return $result;
 }
 
-function toString($arr)
+function toString($result)
 {
     $mapper = function ($acc, $child) {
         if (is_string($child)) {
@@ -93,7 +93,7 @@ function toString($arr)
         }
     };
 
-    $result = array_reduce($arr, $mapper, []);
-    $joined = join("\n", $result);
-    return "{\n{$joined}\n}\n";
+    $result2 = array_reduce($result, $mapper, []);
+    $joined = join("\n", $result2);
+    return "{\n{$joined}\n}";
 }
