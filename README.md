@@ -10,13 +10,36 @@ composer require zharinov/php-project-lvl2
 [![asciicast](https://asciinema.org/a/331315.svg)](https://asciinema.org/a/331315)
 
 
-Make diff
+Step 3
 
 gendiff before.json after.json
 
 [![asciicast](https://asciinema.org/a/331316.svg)](https://asciinema.org/a/331316)
 
+
+Step 5
+
 gendiff before.yaml after.yaml
 
-[![asciicast](https://asciinema.org/a/320277.svg)](https://asciinema.org/a/320277)
+[![asciicast](https://asciinema.org/a/331427.svg)](https://asciinema.org/a/331427)
 
+
+Step 6
+
+gendiff before_tree.json after_tree.json
+
+[![asciicast](https://asciinema.org/a/331430.svg)](https://asciinema.org/a/331430)
+
+
+Step 7
+
+gendiff --format plain before.json after.json
+
+[![asciicast](https://asciinema.org/a/331431.svg)](https://asciinema.org/a/331431)
+
+
+Step 8
+
+gendiff  --format json before_tree.json after_tree.json
+
+[![asciicast](https://asciinema.org/a/331432.svg)](https://asciinema.org/a/331432)
