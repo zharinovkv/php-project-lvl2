@@ -3,9 +3,13 @@
 [![Build Status](https://travis-ci.org/zharinovkv/php-project-lvl2.svg?branch=master)](https://travis-ci.org/zharinovkv/php-project-lvl2)
 ![PHP Composer](https://github.com/zharinovkv/php-project-lvl2/workflows/PHP%20Composer/badge.svg?branch=master)
 
-Installation
+Step 1 & 2
 
+Installation
 composer require zharinov/php-project-lvl2
+
+gendiff -h
+gendiff -v
 
 [![asciicast](https://asciinema.org/a/331315.svg)](https://asciinema.org/a/331315)
 
@@ -15,6 +19,13 @@ Step 3
 gendiff before.json after.json
 
 [![asciicast](https://asciinema.org/a/331316.svg)](https://asciinema.org/a/331316)
+
+
+Step 4
+
+make test
+
+[![asciicast](https://asciinema.org/a/331439.svg)](https://asciinema.org/a/331439)
 
 
 Step 5
