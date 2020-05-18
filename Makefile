@@ -17,10 +17,10 @@ test:
 	composer run-script phpunit tests
 
 h:
-	gendiff -h
+	bin/gendiff -h
 
 v:
-	gendiff -v
+	bin/gendiff -v
 
 g:
 	bin/gendiff assets/before.json assets/after.json
@@ -33,6 +33,12 @@ gp:
 
 gp2:
 	bin/gendiff --format pretty assets/before_tree.json assets/after_tree.json
+
+y:
+	bin/gendiff assets/before.yaml assets/after.yaml
+
+y2:
+	bin/gendiff before.yaml after.yaml
 
 p:
 	bin/gendiff --format plain assets/before.json assets/after.json
@@ -49,5 +55,5 @@ j2:
 x:
 	bin/gendiff ../../../Desktop/assets/before.json ../../../Desktop/assets/after.json
 
-y:
+z:
 	bin/gendiff /home/konstantin/Desktop/assets/before.json /home/konstantin/Desktop/assets/after.json

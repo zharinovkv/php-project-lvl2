@@ -7,14 +7,14 @@ Installation
 
 composer require zharinov/php-project-lvl2
 
-[![asciicast](https://asciinema.org/a/318566.svg)](https://asciinema.org/a/318566)
+[![asciicast](https://asciinema.org/a/331315.svg)](https://asciinema.org/a/331315)
 
 
 Make diff
 
 gendiff before.json after.json
 
-[![asciicast](https://asciinema.org/a/318570.svg)](https://asciinema.org/a/318570)
+[![asciicast](https://asciinema.org/a/331316.svg)](https://asciinema.org/a/331316)
 
 gendiff before.yaml after.yaml
 
