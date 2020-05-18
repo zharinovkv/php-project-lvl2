@@ -4,7 +4,7 @@ namespace Differ\settings;
 
 const KEYS = ['path_before' => 'path_before', 'path_after' => 'path_after'];
 
-const ASSETS = 'assets/';
+const ASSETS = '/assets/';
 
 const SPACE = '    ';
 

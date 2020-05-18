@@ -28,7 +28,7 @@ function getPathsToFiles(...$paths)
     $assets = ASSETS;
 
     $mapper = function ($path) use ($assets) {
-        $pathToFile = !(bool)substr_count($path, '/') ? $path = "{$assets}{$path}" : $path;
+        $pathToFile = !(bool)substr_count($path, '/') ? $path = __DIR__ . "/..{$assets}{$path}" : $path;
         
         if (!file_exists($pathToFile)) {
             throw new \Exception("По указанному адресу файл {$pathToFile} не существует.");
