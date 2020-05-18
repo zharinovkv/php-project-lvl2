@@ -19,19 +19,16 @@ function genDiff($path_before, $path_after, $format = 'pretty')
     $render = "\Differ\Formatters\\{$format}\\render";
     $rendered = $render($ast);
     $toString = "\Differ\Formatters\\{$format}\\toString";
-    $result = $toString($rendered);
-    return $result;
+    return $toString($rendered);
 }
 
 function getPathsToFiles(...$paths)
 {
-    $assets = ASSETS;
-
-    $mapper = function ($path) use ($assets) {
-        $pathToFile = !(bool)substr_count($path, '/') ? $path = "{$assets}{$path}" : $path;
+    $mapper = function ($path) {
+        $pathToFile = !(bool)substr_count($path, '/') ? $path = "./{$path}" : $path;
 
         if (!file_exists($pathToFile)) {
-            throw new \Exception("По указанному адресу файл {$pathToFile} не существует.");
+            throw new \Exception("По указанному пути файл {$pathToFile} не существует.");
         }
         return $pathToFile;
     };
