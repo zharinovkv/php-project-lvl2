@@ -20,14 +20,18 @@ function createItem($item)
     $before = getValue($item['before']);
     $after = getValue($item['after']);
 
-    if ($item[PROPS['type']] === 'removed') {
-        return "{$item[PROPS['name']]}' was {$item[PROPS['type']]}";
-    }
-    if ($item[PROPS['type']] === 'changed') {
-        return "{$item[PROPS['name']]}' was {$item[PROPS['type']]}. From '{$before}' to '{$after}'";
-    }
-    if ($item[PROPS['type']] === 'added') {
-        return "{$item[PROPS['name']]}' was {$item[PROPS['type']]} with value: '{$after}'";
+    switch ($item[PROPS['type']]) {
+        case 'removed':
+            return "{$item[PROPS['name']]}' was {$item[PROPS['type']]}";
+            break;
+        case 'changed':
+            return "{$item[PROPS['name']]}' was {$item[PROPS['type']]}. From '{$before}' to '{$after}'";
+            break;
+        case 'added':
+            return "{$item[PROPS['name']]}' was {$item[PROPS['type']]} with value: '{$after}'";
+            break;
+        default:
+            throw new \Exception("Типа {$item[PROPS['type']]} не существует.");
     }
 }
 
@@ -66,7 +70,7 @@ function getDiff($ast)
             return $acc;
         }
     };
-    return array_reduce($ast, $mapper, []);  
+    return array_reduce($ast, $mapper, []);
 }
 
 function toString($array)
@@ -89,7 +93,7 @@ function toString($array)
             return $acc;
         }
     };
-        $reduced = array_reduce($array, $mapper, []);
-        $joined = join("\n", $reduced);
-        return "{$joined}";
+    $reduced = array_reduce($array, $mapper, []);
+    $joined = join("\n", $reduced);
+    return "{$joined}";
 }
