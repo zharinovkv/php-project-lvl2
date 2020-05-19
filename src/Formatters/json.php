@@ -6,42 +6,30 @@ use const Differ\settings\SPACE;
 use const Differ\settings\TYPES;
 use const Differ\settings\PROPS;
 
-function getValue($value, $space_base)
+function getValue($value, $space)
 {
-    $space = SPACE;
+    $spaceAdd = SPACE;
 
-    $func_object = function ($value) use ($space_base, $space) {
-        $value = get_object_vars($value);
-        $key = array_key_first($value);
-        return "{\n{$space_base}{$space}\"{$key}\": \"{$value[$key]}\"\n{$space_base}}";
-    };
-    $func_bool = function ($value) {
-        $val = json_encode($value);
-        return "\"{$val}\"";
-    };
-    $func_numeric = function ($value) {
-        $val = (string) $value;
-        return "\"{$val}\"";
-    };
-    $func_string = function ($value) {
-        return "\"{$value}\"";
-    };
+    $values = [
+        'object' => function ($value) use ($space, $spaceAdd) {
+            $value = get_object_vars($value);
+            $key = array_key_first($value);
+            return "{\n{$space}{$spaceAdd}\"{$key}\": \"{$value[$key]}\"\n{$space}}";
+        },
+        'boolean' => function ($value) {
+            $val = json_encode($value);
+            return "\"{$val}\"";
+        },
+        'integer' => function ($value) {
+            $val = (string) $value;
+            return "\"{$val}\"";
+        },
+        'string' => function ($value) {
+            return "\"{$value}\"";
+        }
+    ];
 
-    if (is_object($value)) {
-        return $func_object($value);
-    } elseif (is_bool($value)) {
-        return $func_bool($value);
-    } elseif (is_numeric($value)) {
-        return $func_numeric($value);
-    } elseif (is_string($value)) {
-        return $func_string($value);
-    }
-    return $value;
-}
-
-function space($depth, $mult = 1, $subt = 0)
-{
-    return str_repeat(SPACE, $depth * $mult - $subt);
+    return gettype($value) ? $values[gettype($value)]($value) : "\"{$value}\"";
 }
 
 function createItem($item)
@@ -54,28 +42,28 @@ function createItem($item)
     };
     $filtered = array_filter($item, $filter, ARRAY_FILTER_USE_BOTH);
 
-    $space_base = space($item['depth'], 2, 0);
-    $space_bracket = space($item['depth'], 2, 1);
+    $space = str_repeat(SPACE, $item[PROPS['depth']] * 2);
+    $space_bracket = str_repeat(SPACE, $item[PROPS['depth']] * 2 - 1);
 
     $keys = array_keys($filtered);
-    $reducer = function ($acc, $key) use ($filtered, $space_base, $space_bracket) {
 
-        $val = getValue($filtered[$key], $space_base, $space_bracket);
+    $reducer = function ($acc, $key) use ($filtered, $space) {
+
+        $val = getValue($filtered[$key], $space);
 
         if ($key !== 'depth') {
-            $acc[] = "\n{$space_base}\"{$key}\": {$val}";
+            $acc[] = "\n{$space}\"{$key}\": {$val}";
         }
         return $acc;
     };
     $reduced = array_reduce($keys, $reducer, []);
+
     $joined = join(',', $reduced);
     return "{$space_bracket}{{$joined}\n{$space_bracket}}";
 }
 
 function getDiff($ast)
 {
-    $space = SPACE;
-
     $types = [
         TYPES['unchanged'] => function ($item) {
             return createItem($item);
@@ -94,41 +82,36 @@ function getDiff($ast)
         },
     ];
 
-    $mapper = function ($acc, $child) use ($types, $space) {
+    $reducer = function ($acc, $child) use ($types) {
 
-        $sb = space($child['depth'], 2, 0);
+        $space = str_repeat(SPACE, $child[PROPS['depth']]);
+        $space_inner = str_repeat(SPACE, $child[PROPS['depth']] + 1);
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
             $children = join(",\n", getDiff($child['children']));
-
-/*             $acc[] = [$child['name'] => "{$space}{\n{$sb}\"type\": \"nested\",\n" .
-                "{$sb}\"name\": \"{$child['name']}\",\n" .
-                "{$sb}\"children\": [\n{$children}\n{$sb}]\n{$space}}"];
-            return $acc; */
-
-            $acc[] = "{$space}{\n{$sb}\"type\": \"nested\",\n" .
-                "{$sb}\"name\": \"{$child['name']}\",\n" .
-                "{$sb}\"children\": [\n{$children}\n{$sb}]\n{$space}}";
+            $acc[] = "{$space}{\n" .
+                "{$space_inner}\"type\": \"nested\",\n" .
+                "{$space_inner}\"name\": \"{$child['name']}\",\n" .
+                "{$space_inner}\"children\": [\n{$children}\n" .
+                "{$space_inner}]\n{$space}}";
             return $acc;
         } else {
             $acc[] = $item;
             return $acc;
         }
     };
-    return array_reduce($ast, $mapper, []);
+    return array_reduce($ast, $reducer, []);
 }
 
-function toString($array)
+function toString($diff)
 {
-    //print_r($array);
-
-    $mapper = function ($acc, $child) {
+    $reducer = function ($acc, $child) {
         $acc[] = $child;
         return $acc;
     };
 
-    $reduced = array_reduce($array, $mapper, []);
+    $reduced = array_reduce($diff, $reducer, []);
     $joined = join(",\n", $reduced);
     return "[\n{$joined}\n]";
 }
