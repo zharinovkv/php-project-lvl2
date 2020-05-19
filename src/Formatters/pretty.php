@@ -37,24 +37,17 @@ function createItem($item, $index, $pluse = PLUSE, $minus = MINUS, $blank = BLAN
 
 function getDiff($ast)
 {
+
     $types = [
-        TYPES['unchanged'] => function ($item) {
-            return createItem($item, 'beforeValue', null, null, BLANK);
-        },
+        TYPES['unchanged'] => fn ($item) => createItem($item, 'beforeValue', null, null, BLANK),
         TYPES['changed'] => function ($item) {
             $before = createItem($item, 'beforeValue', null, MINUS, null);
             $after = createItem($item, 'afterValue', PLUSE, null, null);
             return [$after, $before];
         },
-        TYPES['removed'] => function ($item) {
-            return createItem($item, 'beforeValue', null, MINUS, null);
-        },
-        TYPES['added'] => function ($item) {
-            return createItem($item, 'afterValue', PLUSE, null, null);
-        },
-        TYPES['nested'] => function ($item) {
-            return getDiff($item[PROPS['children']]);
-        },
+        TYPES['removed'] => fn ($item) => createItem($item, 'beforeValue', null, MINUS, null),
+        TYPES['added'] => fn ($item) => createItem($item, 'afterValue', PLUSE, null, null),
+        TYPES['nested'] => fn ($item) => getDiff($item[PROPS['children']])
     ];
 
     $reducer = function ($acc, $child) use ($types) {

@@ -65,21 +65,11 @@ function createItem($item)
 function getDiff($ast)
 {
     $types = [
-        TYPES['unchanged'] => function ($item) {
-            return createItem($item);
-        },
-        TYPES['changed'] => function ($item) {
-            return createItem($item);
-        },
-        TYPES['removed'] => function ($item) {
-            return createItem($item);
-        },
-        TYPES['added'] => function ($item) {
-            return createItem($item);
-        },
-        TYPES['nested'] => function ($item) {
-            return getDiff($item[PROPS['children']]);
-        },
+        TYPES['unchanged'] => fn ($item) => createItem($item),
+        TYPES['changed'] => fn ($item) => createItem($item),
+        TYPES['removed'] => fn ($item) => createItem($item),
+        TYPES['added'] => fn ($item) => createItem($item),
+        TYPES['nested'] => fn ($item) => getDiff($item[PROPS['children']])
     ];
 
     $reducer = function ($acc, $child) use ($types) {
