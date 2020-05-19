@@ -35,12 +35,7 @@ function getContent($paths)
 
     $ext = strtolower(pathinfo($paths[KEYS['path_before']], PATHINFO_EXTENSION));
 
-    return array_map(${$ext}, $paths);
-}
-
-function splitOnBeforeAndAfter($content)
-{
-    return [$content[KEYS['path_before']], $content[KEYS['path_after']]];
+    return array_map($$ext, $paths);
 }
 
 function createNode($type, $key, $beforeValue, $afterValue, $depth, $children)
@@ -56,20 +51,17 @@ function createNode($type, $key, $beforeValue, $afterValue, $depth, $children)
     return $item;
 }
 
-function getAst($before, $after, $depth = 1)
+function getAst($content, $depth = 1)
 {
+    [$before, $after] = [$content[KEYS['path_before']], $content[KEYS['path_after']]];    
     $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
 
     $mapper = function ($key) use ($before, $after, $depth) {
         if (property_exists($before, $key) && property_exists($after, $key)) {
             if (is_object($before->$key) && is_object($after->$key)) {
                 $item = createNode(
-                    TYPES['nested'],
-                    $key,
-                    null,
-                    null,
-                    $depth,
-                    getAst($before->$key, $after->$key, $depth + 1, $key)
+                    TYPES['nested'], $key, null, null, $depth,
+                    getAst(["path_before"=>$before->$key, "path_after"=>$after->$key], $depth + 1)
                 );
                 return $item;
             } else {
