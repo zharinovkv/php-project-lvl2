@@ -15,39 +15,39 @@ function getValue($value)
     return $value;
 }
 
-function createItem($item, $resume)
+function createItem($item)
 {
     $before = getValue($item['before']);
     $after = getValue($item['after']);
 
-    if ($resume === 'removed') {
-        return "{$item[PROPS['name']]}' was {$resume}";
+    if ($item[PROPS['type']] === 'removed') {
+        return "{$item[PROPS['name']]}' was {$item[PROPS['type']]}";
     }
-    if ($resume === 'changed') {
-        return "{$item[PROPS['name']]}' was {$resume}. From '{$before}' to '{$after}'";
+    if ($item[PROPS['type']] === 'changed') {
+        return "{$item[PROPS['name']]}' was {$item[PROPS['type']]}. From '{$before}' to '{$after}'";
     }
-    if ($resume === 'added') {
-        return "{$item[PROPS['name']]}' was {$resume} with value: '{$after}'";
+    if ($item[PROPS['type']] === 'added') {
+        return "{$item[PROPS['name']]}' was {$item[PROPS['type']]} with value: '{$after}'";
     }
 }
 
-function render($ast)
+function getDiff($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
             return null;
         },
         TYPES['changed'] => function ($item) {
-            return createItem($item, 'changed');
+            return createItem($item);
         },
         TYPES['removed'] => function ($item) {
-            return createItem($item, 'removed');
+            return createItem($item);
         },
         TYPES['added'] => function ($item) {
-            return createItem($item, 'added');
+            return createItem($item);
         },
         TYPES['nested'] => function ($item) {
-            return render($item[PROPS['children']]);
+            return getDiff($item[PROPS['children']]);
         },
     ];
 
@@ -56,7 +56,7 @@ function render($ast)
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
-            $acc[] = [$child['name'] => render($child['children'])];
+            $acc[] = [$child['name'] => getDiff($child['children'])];
             return $acc;
         } elseif ($child[PROPS['type']] === TYPES['changed']) {
             $acc[] = $item;
@@ -66,14 +66,11 @@ function render($ast)
             return $acc;
         }
     };
-
-    $result = array_reduce($ast, $mapper, []);
-    return $result;
+    return array_reduce($ast, $mapper, []);  
 }
 
 function toString($array)
 {
-
     $mapper = function ($acc, $child) {
         if (is_string($child)) {
             $acc[] = "Property '{$child}";
@@ -87,14 +84,12 @@ function toString($array)
                 return "Property '{$key}.{$item}";
             };
 
-            $join = array_map($mapper, $withouted);
-            $acc[] = implode("\n", $join);
+            $mapped = array_map($mapper, $withouted);
+            $acc[] = join("\n", $mapped);
             return $acc;
         }
     };
-
-        $result2 = array_reduce($array, $mapper, []);
-    
-        $joined = join("\n", $result2);
+        $reduced = array_reduce($array, $mapper, []);
+        $joined = join("\n", $reduced);
         return "{$joined}";
 }

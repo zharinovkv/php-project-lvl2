@@ -32,7 +32,7 @@ function createItem($item, $index, $pluse = PLUSE, $minus = MINUS, $blank = BLAN
     return "{$space}  {$pluse}{$minus}{$blank} {$item[PROPS['name']]}: {$value}";
 }
 
-function render($ast)
+function getDiff($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
@@ -41,7 +41,7 @@ function render($ast)
         TYPES['changed'] => function ($item) {
             $before = createItem($item, 'beforeValue', null, MINUS, null);
             $after = createItem($item, 'afterValue', PLUSE, null, null);
-            return "{$after},{$before}";
+            return [$after, $before];
         },
         TYPES['removed'] => function ($item) {
             return createItem($item, 'beforeValue', null, MINUS, null);
@@ -50,35 +50,31 @@ function render($ast)
             return createItem($item, 'afterValue', PLUSE, null, null);
         },
         TYPES['nested'] => function ($item) {
-            return render($item[PROPS['children']]);
+            return getDiff($item[PROPS['children']]);
         },
     ];
 
     $mapper = function ($acc, $child) use ($types) {
 
         $space = str_repeat(SPACE, $child['depth']);
-
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
-            $acc[] = [$space . $child['name'] => render($child['children'])];
+            $acc[] = [$space . $child['name'] => getDiff($child['children'])];
             return $acc;
         } elseif ($child[PROPS['type']] === TYPES['changed']) {
-            $items = explode(',', $item);
-            $acc[] = $items[0];
-            $acc[] = $items[1];
+            $acc[] = $item[0];
+            $acc[] = $item[1];
             return $acc;
         } else {
             $acc[] = $item;
             return $acc;
         }
     };
-
-    $result = array_reduce($ast, $mapper, []);
-    return $result;
+    return array_reduce($ast, $mapper, []);
 }
 
-function toString($result)
+function toString($array)
 {
     $mapper = function ($acc, $child) {
         if (is_string($child)) {
@@ -93,7 +89,7 @@ function toString($result)
         }
     };
 
-    $result2 = array_reduce($result, $mapper, []);
-    $joined = join("\n", $result2);
+    $mapped = array_reduce($array, $mapper, []);
+    $joined = join("\n", $mapped);
     return "{\n{$joined}\n}";
 }

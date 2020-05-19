@@ -39,9 +39,9 @@ function getValue($value, $space_base)
     return $value;
 }
 
-function space($depth, $coef1 = 1, $coef2 = 0)
+function space($depth, $mult = 1, $subt = 0)
 {
-    return str_repeat(SPACE, $depth * $coef1 - $coef2);
+    return str_repeat(SPACE, $depth * $mult - $subt);
 }
 
 function createItem($item)
@@ -72,9 +72,9 @@ function createItem($item)
     return "{$space_bracket}{{$joined}\n{$space_bracket}}";
 }
 
-function render($ast)
+function getDiff($ast)
 {
-    $sp = SPACE;
+    $space = SPACE;
 
     $types = [
         TYPES['unchanged'] => function ($item) {
@@ -90,39 +90,45 @@ function render($ast)
             return createItem($item);
         },
         TYPES['nested'] => function ($item) {
-            return render($item[PROPS['children']]);
+            return getDiff($item[PROPS['children']]);
         },
     ];
 
-    $mapper = function ($acc, $child) use ($types, $sp) {
+    $mapper = function ($acc, $child) use ($types, $space) {
 
         $sb = space($child['depth'], 2, 0);
-        $space_bracket = space($child['depth'], 2, 1);
-
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
-            $children = join(",\n", render($child['children']));
-            $acc[] = "$sp{\n$sb\"type\": \"nested\",\n" .
-                "$sb\"name\": \"{$child['name']}\",\n$sb\"children\": [\n$children\n$sb]\n$sp}";
+            $children = join(",\n", getDiff($child['children']));
+
+/*             $acc[] = [$child['name'] => "{$space}{\n{$sb}\"type\": \"nested\",\n" .
+                "{$sb}\"name\": \"{$child['name']}\",\n" .
+                "{$sb}\"children\": [\n{$children}\n{$sb}]\n{$space}}"];
+            return $acc; */
+
+            $acc[] = "{$space}{\n{$sb}\"type\": \"nested\",\n" .
+                "{$sb}\"name\": \"{$child['name']}\",\n" .
+                "{$sb}\"children\": [\n{$children}\n{$sb}]\n{$space}}";
             return $acc;
         } else {
             $acc[] = $item;
             return $acc;
         }
     };
-    $result = array_reduce($ast, $mapper, []);
-    return $result;
+    return array_reduce($ast, $mapper, []);
 }
 
-function toString($result)
+function toString($array)
 {
+    //print_r($array);
+
     $mapper = function ($acc, $child) {
         $acc[] = $child;
         return $acc;
     };
 
-    $result2 = array_reduce($result, $mapper, []);
-    $joined = join(",\n", $result2);
+    $reduced = array_reduce($array, $mapper, []);
+    $joined = join(",\n", $reduced);
     return "[\n{$joined}\n]";
 }
