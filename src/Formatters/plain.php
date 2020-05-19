@@ -30,6 +30,9 @@ function createItem($item)
         case 'added':
             return "{$item[PROPS['name']]}' was {$item[PROPS['type']]} with value: '{$after}'";
             break;
+        case 'unchanged':
+            return null;
+            break;
         default:
             throw new \Exception("Типа {$item[PROPS['type']]} не существует.");
     }
@@ -39,7 +42,7 @@ function getDiff($ast)
 {
     $types = [
         TYPES['unchanged'] => function ($item) {
-            return null;
+            return createItem($item);
         },
         TYPES['changed'] => function ($item) {
             return createItem($item);
