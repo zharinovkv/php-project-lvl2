@@ -11,13 +11,16 @@ use const Differ\settings\BLANK;
 use const Differ\settings\TYPES;
 use const Differ\settings\PROPS;
 
-function getValue($value, $space)
+function getValue($value, $depth)
 {
-    $func = function ($value) use ($space) {
+    $space_pre = str_repeat(SPACE, $depth + 1);
+    $space_post = str_repeat(SPACE, $depth);
+
+    $func = function ($value) use ($space_pre, $space_post) {
         $value = get_object_vars($value);
         $key = array_key_first($value);
         $val = $value[$key];
-        return "{\n{$space}" . SPACE . SPACE . "{$key}: {$val}\n{$space}" . SPACE . "}";
+        return "{\n{$space_pre}{$key}: {$val}\n{$space_post}}";
     };
 
     $value = is_bool($value) ? json_encode($value) : $value;
@@ -28,7 +31,7 @@ function getValue($value, $space)
 function createItem($item, $index, $pluse = PLUSE, $minus = MINUS, $blank = BLANK)
 {
     $space = str_repeat(SPACE, $item[PROPS['depth']] - 1);
-    $value = getValue($item[PROPS[$index]], $space);
+    $value = getValue($item[PROPS[$index]], $item[PROPS['depth']]);
     return "{$space}  {$pluse}{$minus}{$blank} {$item[PROPS['name']]}: {$value}";
 }
 
@@ -54,13 +57,13 @@ function getDiff($ast)
         },
     ];
 
-    $mapper = function ($acc, $child) use ($types) {
+    $reducer = function ($acc, $child) use ($types) {
 
-        $space = str_repeat(SPACE, $child['depth']);
+        $space = str_repeat(SPACE, $child[PROPS['depth']]);
         $item = $types[$child[PROPS['type']]]($child);
 
         if ($child[PROPS['type']] === TYPES['nested']) {
-            $acc[] = [$space . $child['name'] => getDiff($child['children'])];
+            $acc[] = [$space . $child[PROPS['name']] => getDiff($child[PROPS['children']])];
             return $acc;
         } elseif ($child[PROPS['type']] === TYPES['changed']) {
             $acc[] = $item[0];
@@ -71,12 +74,12 @@ function getDiff($ast)
             return $acc;
         }
     };
-    return array_reduce($ast, $mapper, []);
+    return array_reduce($ast, $reducer, []);
 }
 
 function toString($array)
 {
-    $mapper = function ($acc, $child) {
+    $reducer = function ($acc, $child) {
         if (is_string($child)) {
             $acc[] = $child;
             return $acc;
@@ -89,7 +92,7 @@ function toString($array)
         }
     };
 
-    $mapped = array_reduce($array, $mapper, []);
-    $joined = join("\n", $mapped);
+    $reduced = array_reduce($array, $reducer, []);
+    $joined = join("\n", $reduced);
     return "{\n{$joined}\n}";
 }
