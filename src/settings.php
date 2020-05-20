@@ -25,5 +25,3 @@ const PROPS = [
     'beforeValue' => 'before', 'afterValue' => 'after',
     'children' => 'children', 'depth' => 'depth'
 ];
-
-const VALUES = ['object' => 'object', 'boolean' => 'boolean'];

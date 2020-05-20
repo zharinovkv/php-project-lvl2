@@ -5,25 +5,25 @@ namespace Differ\Formatters\json;
 use const Differ\settings\SPACE;
 use const Differ\settings\TYPES;
 use const Differ\settings\PROPS;
-use const Differ\settings\VALUES;
 
 function getValue($value, $space)
 {
     $spaceAdd = SPACE;
 
     $values = [
-        VALUES['object'] => function ($value) use ($space, $spaceAdd) {
+        'object' => function ($value) use ($space, $spaceAdd) {
             $value = get_object_vars($value);
             $key = array_key_first($value);
             return "{\n{$space}{$spaceAdd}\"{$key}\": \"{$value[$key]}\"\n{$space}}";
         },
-        VALUES['boolean'] => function ($value) {
+        'boolean' => function ($value) {
             $val = json_encode($value);
             return "\"{$val}\"";
         }
     ];
 
-    return in_array(gettype($value), VALUES) ? $values[gettype($value)]($value) : "\"{$value}\"";
+    $cond = in_array(gettype($value), array_keys($values));
+    return $cond ? $values[gettype($value)]($value) : "\"{$value}\"";
 }
 
 function createItem($item)
