@@ -1,4 +1,4 @@
-name: Install, Linter &  Code Climate
+name: PHP Composer
 
 on:
   - push
