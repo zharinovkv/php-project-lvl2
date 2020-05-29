@@ -8,73 +8,75 @@ use function Differ\differ\genDiff;
 
 class GenDiffTest extends TestCase
 {
-    public function testGenDiffJson()
+    /**
+     * @dataProvider additionProvider
+     */
+    public function testGenDiff($expect, $before, $after, $format = "pretty")
     {
-        $expected = file_get_contents('./tests/expects/pretty.txt');
-        $diff = genDiff("./tests/fixtures/before.json", "./tests/fixtures/after.json");
+        $expected = file_get_contents($expect);
+        $diff = genDiff($before, $after, $format);
         $this->assertEquals($expected, $diff);
     }
 
-    public function testGenDiffJsonPPretty()
+    public function additionProvider()
     {
-        $expected = file_get_contents('./tests/expects/pretty.txt');
-        $diff = genDiff('./tests/fixtures/before.json', './tests/fixtures/after.json', 'pretty');
-        $this->assertEquals($expected, $diff);
-    }
-
-    public function testGenDiffJsonPlain()
-    {
-        $expected = file_get_contents('./tests/expects/plain.txt');
-        $diff = genDiff('./tests/fixtures/before.json', './tests/fixtures/after.json', 'plain');
-        $this->assertEquals($expected, $diff);
-    }
-    
-    public function testGenDiffJsonJson()
-    {
-        $expected = file_get_contents('./tests/expects/json.txt');
-        $diff = genDiff('./tests/fixtures/before.json', './tests/fixtures/after.json', 'json');
-        $this->assertEquals($expected, $diff);
-    }
-
-    public function testGenDiffYaml()
-    {
-        $expected = file_get_contents('./tests/expects/pretty.txt');
-        $diff = genDiff('./tests/fixtures/before.yaml', './tests/fixtures/after.yaml');
-        $this->assertEquals($expected, $diff);
-    }
-    
-    public function testGenDiffYamlPretty()
-    {
-        $expected = file_get_contents('./tests/expects/pretty.txt');
-        $diff = genDiff('./tests/fixtures/before.json', './tests/fixtures/after.json', 'pretty');
-        $this->assertEquals($expected, $diff);
-    }
-
-    public function testGenDiffYamlPlain()
-    {
-        $expected = file_get_contents('./tests/expects/plain.txt');
-        $diff = genDiff('./tests/fixtures/before.json', './tests/fixtures/after.json', 'plain');
-        $this->assertEquals($expected, $diff);
-    }
-
-    public function testGenDiffYamlJson()
-    {
-        $expected = file_get_contents('./tests/expects/json.txt');
-        $diff = genDiff('./tests/fixtures/before.json', './tests/fixtures/after.json', 'json');
-        $this->assertEquals($expected, $diff);
-    }
-
-    public function testGenDiffRelativePath()
-    {
-        $expected = file_get_contents('./tests/expects/pretty.txt');
-        $diff = genDiff(__DIR__ . '/.././tests/fixtures/before.json', __DIR__ .  '/.././tests/fixtures/after.json');
-        $this->assertEquals($expected, $diff);
-    }
-
-    public function testGenDiffAbsolutePath()
-    {
-        $expected = file_get_contents('./tests/expects/pretty.txt');
-        $diff = genDiff(__DIR__ . '/fixtures/before.json', __DIR__ .  '/fixtures/after.json');
-        $this->assertEquals($expected, $diff);
+        return [
+            "testGenDiffJson" => [
+                "./tests/expects/pretty.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json"
+            ],
+            "testGenDiffJsonPretty" => [
+                "./tests/expects/pretty.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json",
+                "pretty"
+            ],
+            "testGenDiffJsonPlain" => [
+                "./tests/expects/plain.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json",
+                "plain"
+            ],
+            "testGenDiffJsonJson" => [
+                "./tests/expects/json.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json",
+                "json"
+            ],
+            "testGenDiffYaml" => [
+                "./tests/expects/pretty.txt",
+                "./tests/fixtures/before.yaml",
+                "./tests/fixtures/after.yaml"
+            ],
+            "testGenDiffYamlPretty" => [
+                "./tests/expects/pretty.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json",
+                "pretty"
+            ],
+            "testGenDiffYamlPlain" => [
+                "./tests/expects/plain.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json",
+                "plain"
+            ],
+            "testGenDiffYamlJson" => [
+                "./tests/expects/json.txt",
+                "./tests/fixtures/before.json",
+                "./tests/fixtures/after.json",
+                "json"
+            ],
+            "testGenDiffRelativePath" => [
+                "./tests/expects/pretty.txt",
+                "../php-project-lvl2/tests/fixtures/before.json",
+                "../php-project-lvl2/tests/fixtures/after.json"
+            ],
+            "testGenDiffAbsolutePath" => [
+                "./tests/expects/pretty.txt",
+                __DIR__ . "/fixtures/before.json",
+                __DIR__ . "/fixtures/after.json"
+            ]
+        ];
     }
 }

@@ -6,36 +6,36 @@
             {
                 "type": "unchanged",
                 "name": "setting1",
-                "before": "Value 1",
-                "after": "Value 1"
+                "valueBefore": "Value 1",
+                "valueAfter": "Value 1"
             },
             {
                 "type": "removed",
                 "name": "setting2",
-                "before": "200"
+                "valueBefore": "200"
             },
             {
                 "type": "unchanged",
                 "name": "setting3",
-                "before": "true",
-                "after": "true"
+                "valueBefore": "true",
+                "valueAfter": "true"
             },
             {
                 "type": "removed",
                 "name": "setting6",
-                "before": {
+                "valueBefore": {
                     "key": "value"
                 }
             },
             {
                 "type": "added",
                 "name": "setting4",
-                "after": "blah blah"
+                "valueAfter": "blah blah"
             },
             {
                 "type": "added",
                 "name": "setting5",
-                "after": {
+                "valueAfter": {
                     "key5": "value5"
                 }
             }
@@ -48,28 +48,28 @@
             {
                 "type": "changed",
                 "name": "baz",
-                "before": "bas",
-                "after": "bars"
+                "valueBefore": "bas",
+                "valueAfter": "bars"
             },
             {
                 "type": "unchanged",
                 "name": "foo",
-                "before": "bar",
-                "after": "bar"
+                "valueBefore": "bar",
+                "valueAfter": "bar"
             }
         ]
     },
     {
         "type": "removed",
         "name": "group2",
-        "before": {
+        "valueBefore": {
             "abc": "12345"
         }
     },
     {
         "type": "added",
         "name": "group3",
-        "after": {
+        "valueAfter": {
             "fee": "100500"
         }
     }
