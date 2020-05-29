@@ -16,6 +16,9 @@ lint-fix:
 test:
 	composer run-script phpunit tests
 
+st:
+	git status
+
 h:
 	bin/gendiff -h
 
@@ -23,37 +26,20 @@ v:
 	bin/gendiff -v
 
 g:
-	bin/gendiff assets/before.json assets/after.json
-
-g2:
-	bin/gendiff assets/before_tree.json assets/after_tree.json
+	bin/gendiff tests/fixtures/before.json tests/fixtures/after.json
 
 gp:
-	bin/gendiff --format pretty assets/before.json assets/after.json
+	bin/gendiff --format pretty tests/fixtures/before.json tests/fixtures/after.json
 
-gp2:
-	bin/gendiff --format pretty assets/before_tree.json assets/after_tree.json
 
 y:
-	bin/gendiff assets/before.yaml assets/after.yaml
+	bin/gendiff tests/fixtures/before.yaml tests/fixtures/after.yaml
 
 y2:
 	bin/gendiff before.yaml after.yaml
 
 p:
-	bin/gendiff --format plain assets/before.json assets/after.json
-
-p2:
-	bin/gendiff --format plain assets/before_tree.json assets/after_tree.json
+	bin/gendiff --format plain tests/fixtures/before.json tests/fixtures/after.json
 
 j:
-	bin/gendiff  --format json assets/before.json assets/after.json
-
-j2:
-	bin/gendiff  --format json assets/before_tree.json assets/after_tree.json
-
-x:
-	bin/gendiff ../../../Desktop/assets/before.json ../../../Desktop/assets/after.json
-
-z:
-	bin/gendiff /home/konstantin/Desktop/assets/before.json /home/konstantin/Desktop/assets/after.json
+	bin/gendiff  --format json tests/fixtures/before.json tests/fixtures/after.json

@@ -35,12 +35,12 @@
         "psr-4": { "Symfony\\Component\\Yaml\\": "" },
         "files": [
             "src/gendiff.php",
-            "src/parser.php",
             "src/differ.php",
+            "src/parsers.php",
+            "src/ast.php",
             "src/Formatters/pretty.php",
             "src/Formatters/plain.php",
-            "src/Formatters/json.php",
-            "src/settings.php"
+            "src/Formatters/json.php"
         ]
     }
 }
