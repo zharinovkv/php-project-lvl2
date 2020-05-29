@@ -24,7 +24,8 @@ class GenDiffTest extends TestCase
             "testGenDiffJson" => [
                 "./tests/expects/pretty.txt",
                 "./tests/fixtures/before.json",
-                "./tests/fixtures/after.json"
+                "./tests/fixtures/after.json",
+                "pretty"
             ],
             "testGenDiffJsonPretty" => [
                 "./tests/expects/pretty.txt",
@@ -47,7 +48,8 @@ class GenDiffTest extends TestCase
             "testGenDiffYaml" => [
                 "./tests/expects/pretty.txt",
                 "./tests/fixtures/before.yaml",
-                "./tests/fixtures/after.yaml"
+                "./tests/fixtures/after.yaml",
+                "pretty"
             ],
             "testGenDiffYamlPretty" => [
                 "./tests/expects/pretty.txt",
@@ -70,12 +72,14 @@ class GenDiffTest extends TestCase
             "testGenDiffRelativePath" => [
                 "./tests/expects/pretty.txt",
                 "../php-project-lvl2/tests/fixtures/before.json",
-                "../php-project-lvl2/tests/fixtures/after.json"
+                "../php-project-lvl2/tests/fixtures/after.json",
+                "pretty"
             ],
             "testGenDiffAbsolutePath" => [
                 "./tests/expects/pretty.txt",
                 __DIR__ . "/fixtures/before.json",
-                __DIR__ . "/fixtures/after.json"
+                __DIR__ . "/fixtures/after.json",
+                "pretty"
             ]
         ];
     }
