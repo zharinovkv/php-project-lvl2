@@ -22,5 +22,6 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
+          file: ./build/logs/clover.xml
           coverageCommand: make test
           debug: true
