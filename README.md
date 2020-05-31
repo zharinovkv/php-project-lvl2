@@ -5,9 +5,11 @@
 Step 1 & 2
 
 Installation
+
 composer require zharinov/php-project-lvl2
 
 gendiff -h
+
 gendiff -v
 
 [![asciicast](https://asciinema.org/a/331315.svg)](https://asciinema.org/a/331315)

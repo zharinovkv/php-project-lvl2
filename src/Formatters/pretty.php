@@ -76,7 +76,7 @@ function toString($items)
         } elseif (is_array($child)) {
             $key = array_key_first($child);
             $flattened = flatten($child);
-            $joined = implode("\n", $flattened);
+            $joined = join("\n", $flattened);
             $acc[] = $key === 0 ? $joined : "{$key}: {\n{$joined}\n    }";
             return $acc;
         }
