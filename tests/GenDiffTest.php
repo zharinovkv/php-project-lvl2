@@ -13,10 +13,9 @@ class GenDiffTest extends TestCase
      */
     public function testGenDiff($expect, $before, $after, $format = "pretty")
     {
-        $expects = "tests/expects/";
         $fixtures = "tests/fixtures/";
 
-        $expected = file_get_contents("{$expects}{$expect}");
+        $expected = file_get_contents("tests/expects/$expect");
         $diff = genDiff("{$fixtures}{$before}", "{$fixtures}{$after}", $format);
         $this->assertEquals($expected, $diff);
     }
