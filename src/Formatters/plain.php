@@ -16,57 +16,42 @@ function createValue($value)
     return $isFunc ? $values[gettype($value)]($value) : $value;
 }
 
-function createItem($child)
-{
-    $before = createValue($child['valueBefore']);
-    $after = createValue($child['valueAfter']);
-
-    $item = [
-        'removed' => fn ($child) => "{$child['name']}' was {$child['type']}",
-        'changed' => fn ($child) => "{$child['name']}' was {$child['type']}. From '{$before}' to '{$after}'",
-        'added' => fn ($child) => "{$child['name']}' was {$child['type']} with value: '{$after}'"
-    ];
-
-    return $item[$child['type']]($child);
-}
-
 function buildDiff($ast)
 {
-    $types = [
-        'unchanged' => fn () => null,
-        'changed' => fn ($child) => createItem($child),
-        'removed' => fn ($child) => createItem($child),
-        'added' => fn ($child) => createItem($child),
-        'nested' => fn ($child) => buildDiff($child['children'])
-    ];
+    $mapper = function ($child) {
 
-    $mapper = function ($acc, $child) use ($types) {
+        $before = isset($child['valueBefore']) ? createValue($child['valueBefore']) : '';
+        $after = isset($child['valueAfter']) ? createValue($child['valueAfter']) : '';
 
-        $item = $types[$child['type']]($child);
-
-        if ($child['type'] === 'nested') {
-            $acc[] = [$child['name'] => buildDiff($child['children'])];
-            return $acc;
-        } else {
-            $acc[] = $item;
-            return $acc;
+        switch ($child['type']) {
+            case ($child['type'] === 'unchanged'):
+                return;
+            case ($child['type'] === 'changed'):
+                return "{$child['name']}' was changed. From '{$before}' to '{$after}'";
+            case ($child['type'] === 'removed'):
+                return "{$child['name']}' was removed";
+            case ($child['type'] === 'added'):
+                return "{$child['name']}' was added with value: '{$after}'";
+            case ($child['type'] === 'nested'):
+                return [$child['name'] => buildDiff($child['children'])];
+            default:
+                throw new \Exception("Type \"{$child['type']}\" not supported.");
         }
     };
-    return array_reduce($ast, $mapper, []);
+    return array_map($mapper, $ast);
 }
 
 function toString($items)
 {
-    $mapper = function ($acc, $child) {
+    $reducer = function ($acc, $child) {
         if (is_string($child)) {
             $acc[] = "Property '{$child}";
             return $acc;
-        } elseif (is_array($child)) {
-            $key = array_key_first($child);
-
+        } else {
             $flattened = flatten($child);
             $withouted = without($flattened, null);
-
+            
+            $key = array_key_first($child);
             $mapper = function ($item) use ($key) {
                 return "Property '{$key}.{$item}";
             };
@@ -76,7 +61,8 @@ function toString($items)
             return $acc;
         }
     };
-    $reduced = array_reduce($items, $mapper, []);
+    
+    $reduced = array_reduce($items, $reducer, []);
     $joined = join("\n", $reduced);
-    return "{$joined}";
+    return $joined;
 }

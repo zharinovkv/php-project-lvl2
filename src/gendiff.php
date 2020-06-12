@@ -2,29 +2,24 @@
 
 namespace Differ\gendiff;
 
-use Docopt;
+use function Differ\parsers\readFile;
+use function Differ\ast\buildAst;
 
-use function Differ\differ\genDiff;
-
-function run()
+function genDiff($filePathBefore, $filePathAfter, $format = 'pretty')
 {
-    $doc = <<<'DOCOPT'
-Generate diff
+    $dataBefore = readFile($filePathBefore);
+    $dataAfter = readFile($filePathAfter);
 
-Usage:
-  gendiff (-h|--help)
-  gendiff (-v|--version)
-  gendiff [--format <fmt>] <firstFile> <secondFile>
+/*     print_r($dataBefore);
+    print_r($dataAfter); */
 
-  Options:
-  -h --help                     Show this screen
-  -v --version                  Show version
-  --format <fmt>                Report format [default: pretty]
+    $ast = buildAst($dataBefore, $dataAfter);
 
-DOCOPT;
+    //print_r($ast);
 
-    $result = Docopt::handle($doc, array('version' => '0.0.1'));
-    $diff = genDiff($result->args["<firstFile>"], $result->args["<secondFile>"], $result->args["--format"]);
-    echo $diff;
-    echo PHP_EOL;
+    $buildDiff = "\Differ\Formatters\\{$format}\\buildDiff";
+    $diff = $buildDiff($ast);
+    
+    $toString = "\Differ\Formatters\\{$format}\\toString";
+    return $toString($diff);
 }

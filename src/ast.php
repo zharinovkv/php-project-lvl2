@@ -2,44 +2,25 @@
 
 namespace Differ\ast;
 
-function createNode($type, $key, $valueBefore, $valueAfter, $depth, $children)
-{
-    return [
-        'type' => $type,
-        'name' => $key,
-        'valueBefore' => $valueBefore,
-        'valueAfter' => $valueAfter,
-        'depth' => $depth,
-        'children' => $children
-    ];
-}
-
-function buildAst($before, $after, $depth = 1)
+function buildAst($before, $after)
 {
     $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
 
-    $mapper = function ($key) use ($before, $after, $depth) {
-        if (property_exists($before, $key) && property_exists($after, $key)) {
-            if (is_object($before->$key) && is_object($after->$key)) {
-                return createNode(
-                    'nested',
-                    $key,
-                    null,
-                    null,
-                    $depth,
-                    buildAst($before->$key, $after->$key, $depth + 1)
-                );
-            } else {
-                if ($before->$key === $after->$key) {
-                    return createNode('unchanged', $key, $before->$key, $after->$key, $depth, null);
-                } elseif ($before->$key !== $after->$key) {
-                    return createNode('changed', $key, $before->$key, $after->$key, $depth, null);
-                }
-            }
-        } elseif (!property_exists($after, $key)) {
-            return createNode('removed', $key, $before->$key, null, $depth, null);
+    $mapper = function ($key) use ($before, $after) {
+        if (!property_exists($after, $key)) {
+            return ['type' => 'removed', 'name' => $key, 'valueBefore' => $before->$key];
         } elseif (!property_exists($before, $key)) {
-            return createNode('added', $key, null, $after->$key, $depth, null);
+            return ['type' => 'added', 'name' => $key, 'valueAfter' => $after->$key];
+        } elseif (is_object($before->$key) && is_object($after->$key)) {
+            return ['type' => 'nested', 'name' => $key, 'children' => buildAst($before->$key, $after->$key)];
+        } elseif ($before->$key === $after->$key) {
+            return ['type' => 'unchanged',
+            'name' => $key,
+            'valueBefore' => $before->$key,
+            'valueAfter' => $after->$key
+            ];
+        } elseif ($before->$key !== $after->$key) {
+            return ['type' => 'changed', 'name' => $key, 'valueBefore' => $before->$key, 'valueAfter' => $after->$key];
         }
     };
 

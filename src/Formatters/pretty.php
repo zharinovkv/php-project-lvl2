@@ -8,15 +8,15 @@ const SPACE = '    ';
 
 function createValue($value, $depth)
 {
-    $spacePre = str_repeat(SPACE, $depth + 1);
-    $spacePost = str_repeat(SPACE, $depth);
+    $space = SPACE;
+    $spaceByDepth = str_repeat(SPACE, $depth);
 
     $values = [
-        'object' => function ($value) use ($spacePre, $spacePost) {
+        'object' => function ($value) use ($space, $spaceByDepth) {
             $value = get_object_vars($value);
             $key = array_key_first($value);
             $val = $value[$key];
-            return "{\n{$spacePre}{$key}: {$val}\n{$spacePost}}";
+            return "{\n{$space}{$spaceByDepth}{$key}: {$val}\n{$spaceByDepth}}";
         },
         'boolean' => function ($value) {
             return json_encode($value);
@@ -27,41 +27,35 @@ function createValue($value, $depth)
     return $isFunc ? $values[gettype($value)]($value) : $value;
 }
 
-function createItem($item, $index, $prefix)
+function createItem($item, $index, $prefix, $depth)
 {
-    $space = str_repeat(SPACE, $item['depth'] - 1);
-    $value = createValue($item[$index], $item['depth']);
-    return "{$space}  {$prefix} {$item['name']}: {$value}";
+    $value = createValue($item[$index], $depth);
+    return "  {$prefix} {$item['name']}: {$value}";
 }
 
-function buildDiff($ast)
+function buildDiff($ast, $depth = 1)
 {
-    $types = [
-        'unchanged' => fn ($item) => createItem($item, 'valueBefore', ' '),
-        'changed' => function ($item) {
-            $before = createItem($item, 'valueBefore', '-');
-            $after = createItem($item, 'valueAfter', '+');
-            return ['after' => $after, 'before' => $before];
-        },
-        'removed' => fn ($item) => createItem($item, 'valueBefore', '-'),
-        'added' => fn ($item) => createItem($item, 'valueAfter', '+'),
-        'nested' => fn ($item) => buildDiff($item['children'])
-    ];
+    $reducer = function ($acc, $child) use ($depth) {
 
-    $reducer = function ($acc, $child) use ($types) {
-
-        $space = str_repeat(SPACE, $child['depth']);
-        $item = $types[$child['type']]($child);
-
-        if ($child['type'] === 'nested') {
-            $acc[] = [$space . $child['name'] => buildDiff($child['children'])];
-            return $acc;
-        } elseif ($child['type'] === 'changed') {
-            [$acc[], $acc[]] = [$item['after'], $item['before']];
-            return $acc;
-        } else {
-            $acc[] = $item;
-            return $acc;
+        switch ($child['type']) {
+            case $child['type'] === 'unchanged':
+                $acc[] = createItem($child, 'valueBefore', ' ', $depth);
+                return $acc;
+            case $child['type'] === 'changed':
+                $acc[] = createItem($child, 'valueAfter', '+', $depth);
+                $acc[] = createItem($child, 'valueBefore', '-', $depth);
+                return $acc;
+            case $child['type'] === 'removed':
+                $acc[] = createItem($child, 'valueBefore', '-', $depth);
+                return $acc;
+            case $child['type'] === 'added':
+                $acc[] = createItem($child, 'valueAfter', '+', $depth);
+                return $acc;
+            case $child['type'] === 'nested':
+                $acc[] = [$child['name'] => buildDiff($child['children'], $depth + 1)];
+                return $acc;
+            default:
+                throw new \Exception("Type \"{$child['type']}\" not supported.");
         }
     };
     return array_reduce($ast, $reducer, []);
@@ -69,15 +63,17 @@ function buildDiff($ast)
 
 function toString($items)
 {
-    $reducer = function ($acc, $child) {
+    $space = SPACE;
+
+    $reducer = function ($acc, $child) use ($space) {
         if (is_string($child)) {
             $acc[] = $child;
             return $acc;
         } elseif (is_array($child)) {
             $key = array_key_first($child);
             $flattened = flatten($child);
-            $joined = join("\n", $flattened);
-            $acc[] = $key === 0 ? $joined : "{$key}: {\n{$joined}\n    }";
+            $joined = join("\n{$space}", $flattened);
+            $acc[] = $key === 0 ? $joined : "{$space}{$key}: {\n{$space}{$joined}\n    }";
             return $acc;
         }
     };
