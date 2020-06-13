@@ -29,8 +29,9 @@ function createValue($value, $depth)
 
 function createItem($item, $index, $prefix, $depth)
 {
+    $spaceByDepth = str_repeat(SPACE, $depth - 1);
     $value = createValue($item[$index], $depth);
-    return "  {$prefix} {$item['name']}: {$value}";
+    return "{$spaceByDepth}  {$prefix} {$item['name']}: {$value}";
 }
 
 function buildDiff($ast, $depth = 1)
@@ -65,20 +66,19 @@ function toString($items)
 {
     $space = SPACE;
 
-    $reducer = function ($acc, $child) use ($space) {
-        if (is_string($child)) {
-            $acc[] = $child;
-            return $acc;
-        } elseif (is_array($child)) {
+    $reduced = array_reduce($items, function ($acc, $child) use ($space) {
+        if (is_array($child)) {
             $key = array_key_first($child);
             $flattened = flatten($child);
-            $joined = join("\n{$space}", $flattened);
-            $acc[] = $key === 0 ? $joined : "{$space}{$key}: {\n{$space}{$joined}\n    }";
+            $joined = join("\n", $flattened);
+            $acc[] = "{$space}{$key}: {\n{$joined}\n{$space}}";
+            return $acc;
+        } else {
+            $acc[] = $child;
             return $acc;
         }
-    };
+    }, []);
 
-    $reduced = array_reduce($items, $reducer, []);
     $joined = join("\n", $reduced);
     return "{\n{$joined}\n}";
 }

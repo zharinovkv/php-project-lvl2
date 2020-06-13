@@ -10,12 +10,7 @@ function genDiff($filePathBefore, $filePathAfter, $format = 'pretty')
     $dataBefore = readFile($filePathBefore);
     $dataAfter = readFile($filePathAfter);
 
-/*     print_r($dataBefore);
-    print_r($dataAfter); */
-
     $ast = buildAst($dataBefore, $dataAfter);
-
-    //print_r($ast);
 
     $buildDiff = "\Differ\Formatters\\{$format}\\buildDiff";
     $diff = $buildDiff($ast);

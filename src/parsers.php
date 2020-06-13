@@ -7,8 +7,9 @@ use Symfony\Component\Yaml\Yaml;
 function readFile($path)
 {
     $fullPath = createPathToFile($path);
-    $content = parseFile($fullPath);
-    return $content;
+    $content = file_get_contents($fullPath);
+    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    return parseFile($content, $ext);
 }
 
 function createPathToFile($path)
@@ -22,10 +23,8 @@ function createPathToFile($path)
     return $pathToFile;
 }
 
-function parseFile($path)
+function parseFile($content, $ext)
 {
-    $content = file_get_contents($path);
-
     $parsers = [
         'json' => function ($content) {
             return json_decode($content, false);
@@ -34,8 +33,6 @@ function parseFile($path)
             return Yaml::parse($content, Yaml::PARSE_OBJECT_FOR_MAP);
         }
     ];
-
-    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
     if (!in_array($ext, array_keys($parsers))) {
         throw new \Exception("Extention \"{$ext}\" not supported.");

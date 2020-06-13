@@ -15,3 +15,6 @@ lf:
 
 test:
 	composer run-script phpunit tests
+
+e1:
+	bin/gendiff --format pretty tests/fixtures/before.json tests/fixtures/after.json
