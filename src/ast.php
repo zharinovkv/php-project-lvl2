@@ -14,9 +14,19 @@ function buildAst($dataBefore, $dataAfter)
         } elseif (is_object($dataBefore->$key) && is_object($dataAfter->$key)) {
             return ['type' => 'nested', 'name' => $key, 'children' => buildAst($dataBefore->$key, $dataAfter->$key)];
         } elseif ($dataBefore->$key === $dataAfter->$key) {
-            return ['type' => 'unchanged', 'name' => $key, 'valueBefore' => $dataBefore->$key, 'valueAfter' => $dataAfter->$key];
+            return [
+                'type' => 'unchanged',
+                'name' => $key,
+                'valueBefore' => $dataBefore->$key,
+                'valueAfter' => $dataAfter->$key
+            ];
         } elseif ($dataBefore->$key !== $dataAfter->$key) {
-            return ['type' => 'changed', 'name' => $key, 'valueBefore' => $dataBefore->$key, 'valueAfter' => $dataAfter->$key];
+            return [
+                'type' => 'changed',
+                'name' => $key,
+                'valueBefore' => $dataBefore->$key,
+                'valueAfter' => $dataAfter->$key
+            ];
         }
     };
 
