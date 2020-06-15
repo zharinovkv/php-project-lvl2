@@ -19,18 +19,18 @@ function buildDiff($ast, $nameGroup = null)
 {
     $mapper = function ($child) use ($nameGroup) {
 
-        $before = isset($child['valueBefore']) ? createValue($child['valueBefore']) : null;
-        $after = isset($child['valueAfter']) ? createValue($child['valueAfter']) : null;
+        $valueBefore = isset($child['valueBefore']) ? createValue($child['valueBefore']) : null;
+        $valueAfter = isset($child['valueAfter']) ? createValue($child['valueAfter']) : null;
 
         switch ($child['type']) {
             case ($child['type'] === 'unchanged'):
                 return;
             case ($child['type'] === 'changed'):
-                return "Property '{$nameGroup}{$child['name']}' was changed. From '{$before}' to '{$after}'";
+                return "Property '{$nameGroup}{$child['name']}' was changed. From '{$valueBefore}' to '{$valueAfter}'";
             case ($child['type'] === 'removed'):
                 return "Property '{$nameGroup}{$child['name']}' was removed";
             case ($child['type'] === 'added'):
-                return "Property '{$nameGroup}{$child['name']}' was added with value: '{$after}'";
+                return "Property '{$nameGroup}{$child['name']}' was added with value: '{$valueAfter}'";
             case ($child['type'] === 'nested'):
                 return buildDiff($child['children'], "{$child['name']}.");
             default:

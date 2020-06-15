@@ -2,21 +2,21 @@
 
 namespace Differ\ast;
 
-function buildAst($before, $after)
+function buildAst($dataBefore, $dataAfter)
 {
-    $keys = array_keys(array_merge(get_object_vars($before), get_object_vars($after)));
+    $keys = array_keys(array_merge(get_object_vars($dataBefore), get_object_vars($dataAfter)));
 
-    $mapper = function ($key) use ($before, $after) {
-        if (!property_exists($after, $key)) {
-            return ['type' => 'removed', 'name' => $key, 'valueBefore' => $before->$key];
-        } elseif (!property_exists($before, $key)) {
-            return ['type' => 'added', 'name' => $key, 'valueAfter' => $after->$key];
-        } elseif (is_object($before->$key) && is_object($after->$key)) {
-            return ['type' => 'nested', 'name' => $key, 'children' => buildAst($before->$key, $after->$key)];
-        } elseif ($before->$key === $after->$key) {
-            return ['type' => 'unchanged', 'name' => $key, 'valueBefore' => $before->$key, 'valueAfter' => $after->$key];
-        } elseif ($before->$key !== $after->$key) {
-            return ['type' => 'changed', 'name' => $key, 'valueBefore' => $before->$key, 'valueAfter' => $after->$key];
+    $mapper = function ($key) use ($dataBefore, $dataAfter) {
+        if (!property_exists($dataAfter, $key)) {
+            return ['type' => 'removed', 'name' => $key, 'valueBefore' => $dataBefore->$key];
+        } elseif (!property_exists($dataBefore, $key)) {
+            return ['type' => 'added', 'name' => $key, 'valueAfter' => $dataAfter->$key];
+        } elseif (is_object($dataBefore->$key) && is_object($dataAfter->$key)) {
+            return ['type' => 'nested', 'name' => $key, 'children' => buildAst($dataBefore->$key, $dataAfter->$key)];
+        } elseif ($dataBefore->$key === $dataAfter->$key) {
+            return ['type' => 'unchanged', 'name' => $key, 'valueBefore' => $dataBefore->$key, 'valueAfter' => $dataAfter->$key];
+        } elseif ($dataBefore->$key !== $dataAfter->$key) {
+            return ['type' => 'changed', 'name' => $key, 'valueBefore' => $dataBefore->$key, 'valueAfter' => $dataAfter->$key];
         }
     };
 
