@@ -14,7 +14,7 @@ function readFile($path)
 
 function createPathToFile($path)
 {
-    $pathToFile = !(bool) substr_count($path, '/') ? "./{$path}" : $path;
+    $pathToFile = substr_count($path, '/') === 0 ? "./{$path}" : $path;
 
     if (!file_exists($pathToFile)) {
         throw new \Exception("File \"{$pathToFile}\" not exist.");
