@@ -13,9 +13,9 @@ function createValue($value, $depth)
 
     $values = [
         'object' => function ($value) use ($space, $spaceByDepth) {
-            $value = get_object_vars($value);
-            $key = array_key_first($value);
-            $val = $value[$key];
+            $array = get_object_vars($value);
+            $key = array_key_first($array);
+            $val = $array[$key];
             return "{\n{$space}{$spaceByDepth}{$key}: {$val}\n{$spaceByDepth}}";
         },
         'boolean' => function ($value) {
