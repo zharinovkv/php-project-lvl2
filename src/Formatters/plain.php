@@ -37,13 +37,11 @@ function buildDiff($ast, $nameGroup = null)
                 throw new \Exception("Type \"{$child['type']}\" not supported.");
         }
     };
-    return array_map($mapper, $ast);
-}
+    $mapped = array_map($mapper, $ast);
 
-function toString($items)
-{
-    $flattened = flatten($items);
-    $filtered = array_filter($flattened, function ($value, $key) {
+    $flattened = flatten($mapped);
+    
+    $filtered = array_filter($flattened, function ($value) {
         return $value !== null;
     }, ARRAY_FILTER_USE_BOTH);
 
