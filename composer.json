@@ -38,6 +38,7 @@
             "src/cli.php",
             "src/parsers.php",
             "src/ast.php",
+            "src/readfile.php",
             "src/Formatters/pretty.php",
             "src/Formatters/plain.php",
             "src/Formatters/json.php"
