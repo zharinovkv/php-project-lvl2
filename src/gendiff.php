@@ -2,19 +2,20 @@
 
 namespace Differ\gendiff;
 
-use function Differ\parsers\readFile;
+use function Differ\readfile\readFile;
 use function Differ\ast\buildAst;
+use function Differ\parsers\parseData;
 
-function genDiff($filePathBefore, $filePathAfter, $format = 'pretty')
+function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
 {
-    $dataBefore = readFile($filePathBefore);
-    $dataAfter = readFile($filePathAfter);
+    $contentBefore = readFile($pathToFileBefore);
+    $contentAfter = readFile($pathToFileAfter);
+
+    $dataBefore = parseData($contentBefore, $pathToFileBefore);
+    $dataAfter = parseData($contentAfter, $pathToFileAfter);
 
     $ast = buildAst($dataBefore, $dataAfter);
 
-    $buildDiff = "\Differ\Formatters\\{$format}\\buildDiff";
-    $diff = $buildDiff($ast);
-    
-    $toString = "\Differ\Formatters\\{$format}\\toString";
-    return $toString($diff);
+    $format = "\Differ\Formatters\\{$format}\\buildDiff";
+    return $format($ast);   
 }

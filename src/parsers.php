@@ -4,27 +4,12 @@ namespace Differ\parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function readFile($path)
+
+
+function parseData($content, $path)
 {
-    $fullPath = createPathToFile($path);
-    $content = file_get_contents($fullPath);
     $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-    return parseFile($content, $ext);
-}
 
-function createPathToFile($path)
-{
-    $pathToFile = substr_count($path, '/') === 0 ? "./{$path}" : $path;
-
-    if (!file_exists($pathToFile)) {
-        throw new \Exception("File \"{$pathToFile}\" not exist.");
-    }
-
-    return $pathToFile;
-}
-
-function parseFile($content, $ext)
-{
     $parsers = [
         'json' => function ($content) {
             return json_decode($content, false);
