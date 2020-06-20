@@ -19,6 +19,28 @@ class GenDiffTest extends TestCase
         $this->assertEquals($expected, $diff);
     }
 
+    /**
+     * @dataProvider additionProviderPaths
+     */
+    public function testGenDiffPaths($path, $format = "pretty")
+    {
+        $expected = file_get_contents("tests/fixtures/expect_pretty.txt");
+        $diff = genDiff("{$path}before.json", "{$path}after.json", $format);
+        $this->assertEquals($expected, $diff);
+    }
+
+    public function additionProviderPaths()
+    {
+        return [
+            "relative" => [
+                __DIR__ . "/../tests/fixtures/"
+            ],
+            "absolute" => [
+                __DIR__ . "/fixtures/"
+            ]
+        ];
+    }
+
     public function additionProvider()
     {
         return [
