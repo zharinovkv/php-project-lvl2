@@ -11,8 +11,8 @@ function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
     $contentBefore = readFile($pathToFileBefore);
     $contentAfter = readFile($pathToFileAfter);
 
-    $dataBefore = parseData($contentBefore, $pathToFileBefore);
-    $dataAfter = parseData($contentAfter, $pathToFileAfter);
+    $dataBefore = parseData($contentBefore);
+    $dataAfter = parseData($contentAfter);
 
     $ast = buildAst($dataBefore, $dataAfter);
 

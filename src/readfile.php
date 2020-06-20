@@ -5,7 +5,9 @@ namespace Differ\readfile;
 function readFile($path)
 {
     $fullPath = createPathToFile($path);
-    return file_get_contents($fullPath);
+    $content['content'] = file_get_contents($fullPath);
+    $content['ext'] = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    return $content;
 }
 
 function createPathToFile($path)
