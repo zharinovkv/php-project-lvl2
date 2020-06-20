@@ -32,7 +32,7 @@ function createItem($item, $index, $prefix, $depth)
     return "{$space}  {$prefix} {$item['name']}: {$value}\n";
 }
 
-function buildDiff($ast, $depth = 1)
+function format($ast, $depth = 1)
 {
     $reducer = function ($acc, $child) use ($depth) {
         switch ($child['type']) {
@@ -52,7 +52,7 @@ function buildDiff($ast, $depth = 1)
             case $child['type'] === 'nested':
                 $space = str_repeat(SPACE, $depth);
                 $acc .= "{$space}{$child['name']}: ";
-                $acc .= buildDiff($child['children'], $depth + 1);
+                $acc .= format($child['children'], $depth + 1);
                 $acc .= "\n";
                 return $acc;
             default:

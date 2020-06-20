@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\json;
 
-function buildDiff($ast)
+function format($ast)
 {
     return json_encode($ast, JSON_PRETTY_PRINT);
 }

@@ -16,6 +16,6 @@ function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
 
     $ast = buildAst($dataBefore, $dataAfter);
 
-    $format = "\Differ\Formatters\\{$format}\\buildDiff";
+    $format = "\Differ\Formatters\\{$format}\\format";
     return $format($ast);
 }

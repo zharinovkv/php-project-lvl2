@@ -13,7 +13,7 @@ function createValue($value)
     return $isFunc ? $values[gettype($value)]($value) : $value;
 }
 
-function buildDiff($ast, $nameGroup = null)
+function format($ast, $nameGroup = null)
 {
     $reducer = function ($acc, $child) use ($nameGroup) {
 
@@ -34,7 +34,7 @@ function buildDiff($ast, $nameGroup = null)
                 $acc[] = "Property '{$nameGroup}{$child['name']}' was added with value: '{$valueAfter}'";
                 break;
             case ($child['type'] === 'nested'):
-                $acc[] = buildDiff($child['children'], "{$child['name']}.");
+                $acc[] = format($child['children'], "{$child['name']}.");
                 break;
             default:
                 throw new \Exception("Type \"{$child['type']}\" not supported.");
