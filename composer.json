@@ -18,7 +18,6 @@
     ],
     "require": {
         "docopt/docopt": "^1.0",
-        "funct/funct": "^1.5",
         "symfony/yaml": "^4.3"
     },
     "require-dev": {
@@ -34,11 +33,11 @@
     "autoload": {
         "psr-4": { "Symfony\\Component\\Yaml\\": "" },
         "files": [
-            "src/gendiff.php",
             "src/cli.php",
+            "src/gendiff.php",
+            "src/readfile.php",
             "src/parsers.php",
             "src/ast.php",
-            "src/readfile.php",
             "src/Formatters/pretty.php",
             "src/Formatters/plain.php",
             "src/Formatters/json.php"
