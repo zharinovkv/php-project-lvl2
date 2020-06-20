@@ -2,8 +2,6 @@
 
 namespace Differ\Formatters\plain;
 
-use function Funct\Collection\flatten;
-
 function createValue($value)
 {
     $values = [
@@ -17,33 +15,33 @@ function createValue($value)
 
 function buildDiff($ast, $nameGroup = null)
 {
-    $mapper = function ($child) use ($nameGroup) {
+    $reducer = function ($acc, $child) use ($nameGroup) {
 
         $valueBefore = isset($child['valueBefore']) ? createValue($child['valueBefore']) : null;
         $valueAfter = isset($child['valueAfter']) ? createValue($child['valueAfter']) : null;
 
         switch ($child['type']) {
             case ($child['type'] === 'unchanged'):
-                return;
+                break;
             case ($child['type'] === 'changed'):
-                return "Property '{$nameGroup}{$child['name']}' was changed. From '{$valueBefore}' to '{$valueAfter}'";
+                $acc[] = "Property '{$nameGroup}{$child['name']}' was changed." .
+                    " From '{$valueBefore}' to '{$valueAfter}'";
+                break;
             case ($child['type'] === 'removed'):
-                return "Property '{$nameGroup}{$child['name']}' was removed";
+                $acc[] = "Property '{$nameGroup}{$child['name']}' was removed";
+                break;
             case ($child['type'] === 'added'):
-                return "Property '{$nameGroup}{$child['name']}' was added with value: '{$valueAfter}'";
+                $acc[] = "Property '{$nameGroup}{$child['name']}' was added with value: '{$valueAfter}'";
+                break;
             case ($child['type'] === 'nested'):
-                return buildDiff($child['children'], "{$child['name']}.");
+                $acc[] = buildDiff($child['children'], "{$child['name']}.");
+                break;
             default:
                 throw new \Exception("Type \"{$child['type']}\" not supported.");
         }
+        return $acc;
     };
-    $mapped = array_map($mapper, $ast);
+    $reduced = array_reduce($ast, $reducer, []);
 
-    $flattened = flatten($mapped);
-    
-    $filtered = array_filter($flattened, function ($value) {
-        return $value !== null;
-    }, ARRAY_FILTER_USE_BOTH);
-
-    return join("\n", $filtered);
+    return join("\n", $reduced);
 }
