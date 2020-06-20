@@ -3,8 +3,8 @@
 namespace Differ\gendiff;
 
 use function Differ\readfile\readFile;
-use function Differ\ast\buildAst;
 use function Differ\parsers\parseData;
+use function Differ\ast\buildAst;
 
 function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
 {
