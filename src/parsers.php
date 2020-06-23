@@ -4,7 +4,7 @@ namespace Differ\parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parseData($content)
+function parseData($content, $path)
 {
     $parsers = [
         'json' => function ($content) {
@@ -15,9 +15,11 @@ function parseData($content)
         }
     ];
 
-    if (!in_array($content['ext'], array_keys($parsers))) {
-        throw new \Exception("Extention \"{$content['ext']}\" not supported.");
+    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+    if (!in_array($ext, array_keys($parsers))) {
+        throw new \Exception("Extention \"{$ext}\" not supported.");
     }
 
-    return $parsers[$content['ext']]($content['content']);
+    return $parsers[$ext]($content);
 }
