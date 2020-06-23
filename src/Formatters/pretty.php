@@ -4,62 +4,63 @@ namespace Differ\Formatters\pretty;
 
 const SPACE = '    ';
 
-function createValue($value, $depth)
+function extractValue($value, $depth)
 {
     $space = SPACE;
     $spaceByDepth = str_repeat(SPACE, $depth);
 
-    $values = [
+    $funcs = [
         'object' => function ($value) use ($space, $spaceByDepth) {
             $array = get_object_vars($value);
             $key = array_key_first($array);
-            $val = $array[$key];
-            return "{\n{$space}{$spaceByDepth}{$key}: {$val}\n{$spaceByDepth}}";
+            return "{\n{$space}{$spaceByDepth}{$key}: {$array[$key]}\n{$spaceByDepth}}";
         },
         'boolean' => function ($value) {
             return json_encode($value);
         }
     ];
 
-    $isFunc = in_array(gettype($value), array_keys($values));
-    return $isFunc ? $values[gettype($value)]($value) : $value;
+    $isFunc = in_array(gettype($value), array_keys($funcs));
+    return $isFunc ? $funcs[gettype($value)]($value) : $value;
 }
 
 function createItem($item, $index, $prefix, $depth)
 {
     $space = str_repeat(SPACE, $depth - 1);
-    $value = createValue($item[$index], $depth);
+    $value = extractValue($item[$index], $depth);
     return "{$space}  {$prefix} {$item['name']}: {$value}\n";
 }
 
-function format($ast, $depth = 1)
+function format($ast)
 {
-    $reducer = function ($acc, $child) use ($depth) {
-        switch ($child['type']) {
-            case $child['type'] === 'unchanged':
-                $acc .= createItem($child, 'valueBefore', ' ', $depth);
-                return $acc;
-            case $child['type'] === 'changed':
-                $acc .= createItem($child, 'valueAfter', '+', $depth);
-                $acc .= createItem($child, 'valueBefore', '-', $depth);
-                return $acc;
-            case $child['type'] === 'removed':
-                $acc .= createItem($child, 'valueBefore', '-', $depth);
-                return $acc;
-            case $child['type'] === 'added':
-                $acc .= createItem($child, 'valueAfter', '+', $depth);
-                return $acc;
-            case $child['type'] === 'nested':
-                $space = str_repeat(SPACE, $depth);
-                $acc .= "{$space}{$child['name']}: ";
-                $acc .= format($child['children'], $depth + 1);
-                $acc .= "\n";
-                return $acc;
-            default:
-                throw new \Exception("Type \"{$child['type']}\" not supported.");
-        }
+    $inner = function ($innerData, $depth) use (&$inner) {
+
+        $reducer = function ($acc, $child) use ($depth, &$inner) {
+            switch ($child['type']) {
+                case $child['type'] === 'unchanged':
+                    $item = createItem($child, 'valueBefore', ' ', $depth);
+                    return "{$acc}{$item}";
+                case $child['type'] === 'changed':
+                    $itemAfter = createItem($child, 'valueAfter', '+', $depth);
+                    $itemBefore = createItem($child, 'valueBefore', '-', $depth);
+                    return "{$acc}{$itemAfter}{$itemBefore}";
+                case $child['type'] === 'removed':
+                    $item = createItem($child, 'valueBefore', '-', $depth);
+                    return "{$acc}{$item}";
+                case $child['type'] === 'added':
+                    $item = createItem($child, 'valueAfter', '+', $depth);
+                    return "{$acc}{$item}";
+                case $child['type'] === 'nested':
+                    $space = str_repeat(SPACE, $depth);
+                    $items = $inner($child['children'], $depth + 1);
+                    return "{$acc}{$space}{$child['name']}: {$items}\n";
+                default:
+                    throw new \Exception("Type \"{$child['type']}\" not supported.");
+            }
+        };
+        $reduced = array_reduce($innerData, $reducer, "");
+        $space = str_repeat(SPACE, $depth - 1);
+        return "{\n{$reduced}{$space}}";
     };
-    $reduced = array_reduce($ast, $reducer, "");
-    $space = str_repeat(SPACE, $depth - 1);
-    return "{\n{$reduced}{$space}}";
+    return $inner($ast, 1);
 }

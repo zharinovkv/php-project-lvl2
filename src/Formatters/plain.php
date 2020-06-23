@@ -2,46 +2,50 @@
 
 namespace Differ\Formatters\plain;
 
-function createValue($value)
+use function Funct\Collection\flatten;
+
+function extractValue($value)
 {
-    $values = [
+    $funcs = [
         'object' => fn () => "complex value",
         'boolean' => fn ($value) => json_encode($value)
     ];
 
-    $isFunc = in_array(gettype($value), array_keys($values));
-    return $isFunc ? $values[gettype($value)]($value) : $value;
+    $isFunc = in_array(gettype($value), array_keys($funcs));
+    return $isFunc ? $funcs[gettype($value)]($value) : $value;
 }
 
-function format($ast, $nameGroup = null)
+function format($ast)
 {
-    $reducer = function ($acc, $child) use ($nameGroup) {
+    $inner = function ($innerData, $nameGroup) use (&$inner) {
 
-        $valueBefore = isset($child['valueBefore']) ? createValue($child['valueBefore']) : null;
-        $valueAfter = isset($child['valueAfter']) ? createValue($child['valueAfter']) : null;
+        $mapper = function ($child) use ($nameGroup, $inner) {
 
-        switch ($child['type']) {
-            case ($child['type'] === 'unchanged'):
-                break;
-            case ($child['type'] === 'changed'):
-                $acc[] = "Property '{$nameGroup}{$child['name']}' was changed." .
-                    " From '{$valueBefore}' to '{$valueAfter}'";
-                break;
-            case ($child['type'] === 'removed'):
-                $acc[] = "Property '{$nameGroup}{$child['name']}' was removed";
-                break;
-            case ($child['type'] === 'added'):
-                $acc[] = "Property '{$nameGroup}{$child['name']}' was added with value: '{$valueAfter}'";
-                break;
-            case ($child['type'] === 'nested'):
-                $acc[] = format($child['children'], "{$child['name']}.");
-                break;
-            default:
-                throw new \Exception("Type \"{$child['type']}\" not supported.");
-        }
-        return $acc;
+            $valueBefore = isset($child['valueBefore']) ? extractValue($child['valueBefore']) : null;
+            $valueAfter = isset($child['valueAfter']) ? extractValue($child['valueAfter']) : null;
+
+            switch ($child['type']) {
+                case ($child['type'] === 'unchanged'):
+                    return;
+                case ($child['type'] === 'changed'):
+                    return "Property '{$nameGroup}{$child['name']}' was changed. " .
+                        "From '{$valueBefore}' to '{$valueAfter}'";
+                case ($child['type'] === 'removed'):
+                    return "Property '{$nameGroup}{$child['name']}' was removed";
+                case ($child['type'] === 'added'):
+                    return "Property '{$nameGroup}{$child['name']}' was added with value: '{$valueAfter}'";
+                case ($child['type'] === 'nested'):
+                    return $inner($child['children'], "{$child['name']}.");
+                default:
+                    throw new \Exception("Type \"{$child['type']}\" not supported.");
+            }
+        };
+        $mapped = array_map($mapper, $innerData);
+        $flattened = flatten($mapped);
+        $filtered = array_filter($flattened, function ($value) {
+            return $value !== null;
+        }, ARRAY_FILTER_USE_BOTH);
+        return join("\n", $filtered);
     };
-    $reduced = array_reduce($ast, $reducer, []);
-
-    return join("\n", $reduced);
+    return $inner($ast, null);
 }
