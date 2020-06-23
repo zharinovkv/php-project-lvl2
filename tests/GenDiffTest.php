@@ -9,7 +9,7 @@ use function Differ\gendiff\genDiff;
 class GenDiffTest extends TestCase
 {
     /**
-     * @dataProvider additionProvider
+     * @dataProvider additionProviderFormats
      */
     public function testGenDiff($expect, $before, $after, $format = "pretty")
     {
@@ -35,13 +35,19 @@ class GenDiffTest extends TestCase
             "relative" => [
                 __DIR__ . "/../tests/fixtures/"
             ],
+            "relative2" => [
+                "tests/fixtures/"
+            ],
+            "relative3" => [
+                "../php-project-lvl2/tests/fixtures/"
+            ],
             "absolute" => [
                 __DIR__ . "/fixtures/"
             ]
         ];
     }
 
-    public function additionProvider()
+    public function additionProviderFormats()
     {
         return [
             "testGenDiffJson" => [
