@@ -6,29 +6,30 @@ const SPACE = '    ';
 
 function extractValue($value, $depth)
 {
-    $space = SPACE;
+    $spaceValueKey = SPACE;
     $spaceByDepth = str_repeat(SPACE, $depth);
 
     $funcs = [
-        'object' => function ($value) use ($space, $spaceByDepth) {
+        'object' => function ($value) use ($spaceValueKey, $spaceByDepth) {
             $array = get_object_vars($value);
             $key = array_key_first($array);
-            return "{\n{$space}{$spaceByDepth}{$key}: {$array[$key]}\n{$spaceByDepth}}";
+            return "{\n{$spaceValueKey}{$spaceByDepth}{$key}: {$array[$key]}\n{$spaceByDepth}}";
         },
         'boolean' => function ($value) {
             return json_encode($value);
         }
     ];
 
-    $isFunc = in_array(gettype($value), array_keys($funcs));
-    return $isFunc ? $funcs[gettype($value)]($value) : $value;
+    $typeValue = gettype($value);
+    $isFunc = in_array($typeValue, array_keys($funcs));
+    return $isFunc ? $funcs[$typeValue]($value) : $value;
 }
 
 function createItem($item, $index, $prefix, $depth)
 {
-    $space = str_repeat(SPACE, $depth - 1);
+    $spaceItemName = str_repeat(SPACE, $depth - 1);
     $value = extractValue($item[$index], $depth);
-    return "{$space}  {$prefix} {$item['name']}: {$value}\n";
+    return "{$spaceItemName}  {$prefix} {$item['name']}: {$value}\n";
 }
 
 function format($ast)
