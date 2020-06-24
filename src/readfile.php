@@ -18,3 +18,8 @@ function createPathToFile($path)
 
     return $pathToFile;
 }
+
+function getExtention($path)
+{
+    return strtolower(pathinfo($path, PATHINFO_EXTENSION));
+}
