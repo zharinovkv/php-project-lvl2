@@ -10,7 +10,7 @@ function readFile($path)
 
 function createPathToFile($path)
 {
-    $pathToFile = substr_count($path, '/') === 0 ? "./{$path}" : $path;
+    $pathToFile = realpath($path);
 
     if (!file_exists($pathToFile)) {
         throw new \Exception("File \"{$pathToFile}\" not exist.");
@@ -21,5 +21,11 @@ function createPathToFile($path)
 
 function getExtention($path)
 {
-    return strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    $extention = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+    if ($extention === "") {
+        throw new \Exception("File \"{$path}\" does not contain the extention.");
+    }
+
+    return $extention;
 }
