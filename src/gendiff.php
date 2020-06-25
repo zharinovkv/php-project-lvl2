@@ -3,7 +3,7 @@
 namespace Differ\gendiff;
 
 use function Differ\readfile\readFile;
-use function Differ\readfile\getExtention;
+use function Differ\parsers\getExtention;
 use function Differ\parsers\parseData;
 use function Differ\ast\buildAst;
 
