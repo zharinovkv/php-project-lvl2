@@ -32,4 +32,3 @@ function getExtention($path)
 
     return $extention;
 }
-
