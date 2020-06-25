@@ -21,3 +21,15 @@ function parseData($content, $ext)
 
     return $parsers[$ext]($content);
 }
+
+function getExtention($path)
+{
+    $extention = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+    if (empty($extention)) {
+        throw new \Exception("File \"{$path}\" does not contain the extention.");
+    }
+
+    return $extention;
+}
+
