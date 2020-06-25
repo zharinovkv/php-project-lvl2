@@ -23,7 +23,7 @@ function getExtention($path)
 {
     $extention = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-    if ($extention === "") {
+    if (empty($extention)) {
         throw new \Exception("File \"{$path}\" does not contain the extention.");
     }
 
