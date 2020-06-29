@@ -25,7 +25,7 @@ function stringifyValue($value, $depth)
     return $isFunc ? $funcs[$type]($value) : $value;
 }
 
-function createItem($item, $index, $prefix, $depth)
+function stringifyItem($item, $index, $prefix, $depth)
 {
     $spaceItemName = str_repeat(SPACE, $depth - 1);
     $value = stringifyValue($item[$index], $depth);
@@ -39,17 +39,17 @@ function format($ast)
         $reducer = function ($acc, $child) use ($depth, &$inner) {
             switch ($child['type']) {
                 case 'unchanged':
-                    $acc[] = createItem($child, 'valueBefore', ' ', $depth);
+                    $acc[] = stringifyItem($child, 'valueBefore', ' ', $depth);
                     return $acc;
                 case 'changed':
-                    $acc[] = createItem($child, 'valueAfter', '+', $depth);
-                    $acc[] = createItem($child, 'valueBefore', '-', $depth);
+                    $acc[] = stringifyItem($child, 'valueAfter', '+', $depth);
+                    $acc[] = stringifyItem($child, 'valueBefore', '-', $depth);
                     return $acc;
                 case 'removed':
-                    $acc[] = createItem($child, 'valueBefore', '-', $depth);
+                    $acc[] = stringifyItem($child, 'valueBefore', '-', $depth);
                     return $acc;
                 case 'added':
-                    $acc[] = createItem($child, 'valueAfter', '+', $depth);
+                    $acc[] = stringifyItem($child, 'valueAfter', '+', $depth);
                     return $acc;
                 case 'nested':
                     $space = str_repeat(SPACE, $depth);
