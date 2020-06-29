@@ -2,9 +2,8 @@
 
 namespace Differ\gendiff;
 
-use function Differ\path\buildPathToFile;
+use function Differ\path\{buildPathToFile, getExtention};
 use function Differ\readfile\readFile;
-use function Differ\path\getExtention;
 use function Differ\ast\buildAst;
 
 use const Differ\parsers\PARSERS;
