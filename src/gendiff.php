@@ -6,7 +6,6 @@ use function Differ\path\{buildPathToFile, getExtention};
 use function Differ\readfile\readFile;
 use function Differ\ast\buildAst;
 use function Differ\parsers\parsers;
-use function Differ\formatters\formatters;
 
 use const Differ\formatters\FORMATTERS;
 
