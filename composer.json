@@ -39,6 +39,8 @@
             "src/readfile.php",
             "src/parsers.php",
             "src/ast.php",
+            "src/path.php",
+            "src/formatters.php",
             "src/Formatters/pretty.php",
             "src/Formatters/plain.php",
             "src/Formatters/json.php"
