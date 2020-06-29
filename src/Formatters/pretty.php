@@ -4,7 +4,7 @@ namespace Differ\Formatters\pretty;
 
 const SPACE = '    ';
 
-function extractValue($value, $depth)
+function stringifyValue($value, $depth)
 {
     $spaceValueKey = SPACE;
     $spaceByDepth = str_repeat(SPACE, $depth);
@@ -20,16 +20,16 @@ function extractValue($value, $depth)
         }
     ];
 
-    $typeValue = gettype($value);
-    $isFunc = in_array($typeValue, array_keys($funcs));
-    return $isFunc ? $funcs[$typeValue]($value) : $value;
+    $type = gettype($value);
+    $isFunc = in_array($type, array_keys($funcs));
+    return $isFunc ? $funcs[$type]($value) : $value;
 }
 
 function createItem($item, $index, $prefix, $depth)
 {
     $spaceItemName = str_repeat(SPACE, $depth - 1);
-    $value = extractValue($item[$index], $depth);
-    return "{$spaceItemName}  {$prefix} {$item['name']}: {$value}\n";
+    $value = stringifyValue($item[$index], $depth);
+    return "{$spaceItemName}  {$prefix} {$item['name']}: {$value}";
 }
 
 function format($ast)
@@ -38,30 +38,33 @@ function format($ast)
 
         $reducer = function ($acc, $child) use ($depth, &$inner) {
             switch ($child['type']) {
-                case $child['type'] === 'unchanged':
-                    $item = createItem($child, 'valueBefore', ' ', $depth);
-                    return "{$acc}{$item}";
-                case $child['type'] === 'changed':
-                    $itemAfter = createItem($child, 'valueAfter', '+', $depth);
-                    $itemBefore = createItem($child, 'valueBefore', '-', $depth);
-                    return "{$acc}{$itemAfter}{$itemBefore}";
-                case $child['type'] === 'removed':
-                    $item = createItem($child, 'valueBefore', '-', $depth);
-                    return "{$acc}{$item}";
-                case $child['type'] === 'added':
-                    $item = createItem($child, 'valueAfter', '+', $depth);
-                    return "{$acc}{$item}";
-                case $child['type'] === 'nested':
+                case 'unchanged':
+                    $acc[] = createItem($child, 'valueBefore', ' ', $depth);
+                    return $acc;
+                case 'changed':
+                    $acc[] = createItem($child, 'valueAfter', '+', $depth);
+                    $acc[] = createItem($child, 'valueBefore', '-', $depth);
+                    return $acc;
+                case 'removed':
+                    $acc[] = createItem($child, 'valueBefore', '-', $depth);
+                    return $acc;
+                case 'added':
+                    $acc[] = createItem($child, 'valueAfter', '+', $depth);
+                    return $acc;
+                case 'nested':
                     $space = str_repeat(SPACE, $depth);
                     $items = $inner($child['children'], $depth + 1);
-                    return "{$acc}{$space}{$child['name']}: {$items}\n";
+                    $group = array_merge(["{$space}{$child['name']}: {"], $items, ["{$space}}"]);
+                    $acc[] = join("\n", $group);
+                    return $acc;
                 default:
                     throw new \Exception("Type \"{$child['type']}\" not supported.");
             }
         };
-        $reduced = array_reduce($innerData, $reducer, "");
-        $space = str_repeat(SPACE, $depth - 1);
-        return "{\n{$reduced}{$space}}";
+        return array_reduce($innerData, $reducer, []);
     };
-    return $inner($ast, 1);
+
+    $result = $inner($ast, 1);
+    $joined = join("\n", $result);
+    return "{\n{$joined}\n}";
 }
