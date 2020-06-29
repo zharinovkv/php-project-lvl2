@@ -5,8 +5,9 @@ namespace Differ\gendiff;
 use function Differ\path\{buildPathToFile, getExtention};
 use function Differ\readfile\readFile;
 use function Differ\ast\buildAst;
+use function Differ\parsers\parsers;
+use function Differ\formatters\formatters;
 
-use const Differ\parsers\PARSERS;
 use const Differ\formatters\FORMATTERS;
 
 function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
@@ -20,11 +21,14 @@ function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
     $extentionBefore = getExtention($pathToFileBefore);
     $extentionAfter = getExtention($pathToFileAfter);
 
-    $dataBefore = isset(PARSERS[$extentionBefore]) ? PARSERS[$extentionBefore]($contentBefore) :
+    $parsers = parsers();
+    $dataBefore = isset($parsers[$extentionBefore]) ? $parsers[$extentionBefore]($contentBefore) :
         new \Exception("Extention \"{$extentionBefore}\" not supported.");
-    $dataAfter = isset(PARSERS[$extentionAfter]) ? PARSERS[$extentionAfter]($contentAfter) :
+    $dataAfter = isset($parsers[$extentionAfter]) ? $parsers[$extentionAfter]($contentAfter) :
         new \Exception("Extention \"{$extentionAfter}\" not supported.");
 
     $ast = buildAst($dataBefore, $dataAfter);
-    return FORMATTERS[$format]($ast);
+
+    return isset(FORMATTERS[$format]) ? FORMATTERS[$format]($ast) :
+        new \Exception("Formatter \"{$format}\" not supported.");
 }
