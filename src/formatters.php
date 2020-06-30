@@ -2,8 +2,14 @@
 
 namespace Differ\formatters;
 
-const FORMATTERS = [
-    'pretty' => '\\Differ\Formatters\pretty\format',
-    'plain' => '\\Differ\Formatters\plain\format',
-    'json' => '\\Differ\Formatters\json\format'
-];
+function formatters($format)
+{
+    $allow = in_array($format, ['pretty', 'plain', 'json']);
+
+    switch ($allow) {
+        case true:
+            return "\Differ\Formatters\\{$format}\\format";
+        default:
+            throw new \Exception("Formatter \"{$format}\" not supported.");
+    }
+}
