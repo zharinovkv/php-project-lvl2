@@ -36,32 +36,28 @@ function format($ast)
 {
     $inner = function ($innerData, $depth) use (&$inner) {
 
-        $reducer = function ($acc, $child) use ($depth, &$inner) {
+        $mapper = function ($child) use ($depth, &$inner) {
             switch ($child['type']) {
                 case 'unchanged':
-                    $acc[] = stringifyItem($child, 'valueBefore', ' ', $depth);
-                    return $acc;
+                    return stringifyItem($child, 'valueBefore', ' ', $depth);
                 case 'changed':
-                    $acc[] = stringifyItem($child, 'valueAfter', '+', $depth);
-                    $acc[] = stringifyItem($child, 'valueBefore', '-', $depth);
-                    return $acc;
+                    $changed[] = stringifyItem($child, 'valueAfter', '+', $depth);
+                    $changed[] = stringifyItem($child, 'valueBefore', '-', $depth);
+                    return join("\n", $changed);
                 case 'removed':
-                    $acc[] = stringifyItem($child, 'valueBefore', '-', $depth);
-                    return $acc;
+                    return stringifyItem($child, 'valueBefore', '-', $depth);
                 case 'added':
-                    $acc[] = stringifyItem($child, 'valueAfter', '+', $depth);
-                    return $acc;
+                    return stringifyItem($child, 'valueAfter', '+', $depth);
                 case 'nested':
                     $space = str_repeat(SPACE, $depth);
                     $items = $inner($child['children'], $depth + 1);
                     $group = array_merge(["{$space}{$child['name']}: {"], $items, ["{$space}}"]);
-                    $acc[] = join("\n", $group);
-                    return $acc;
+                    return join("\n", $group);
                 default:
                     throw new \Exception("Type \"{$child['type']}\" not supported.");
             }
         };
-        return array_reduce($innerData, $reducer, []);
+        return array_map($mapper, $innerData);
     };
 
     $result = $inner($ast, 1);

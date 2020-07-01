@@ -5,26 +5,26 @@ namespace Differ\gendiff;
 use function Differ\path\{buildPathToFile, getExtention};
 use function Differ\readfile\readFile;
 use function Differ\ast\buildAst;
-use function Differ\parsers\parsers;
-use function Differ\formatters\formatters;
+use function Differ\parsers\selectParser;
 
 function genDiff($pathToFileBefore, $pathToFileAfter, $format = 'pretty')
 {
     $realPathToFileBefore = buildPathToFile($pathToFileBefore);
     $realPathToFileAfter = buildPathToFile($pathToFileAfter);
 
-    $contentBefore = readFile($realPathToFileBefore);
-    $contentAfter = readFile($realPathToFileAfter);
-
     $extentionBefore = getExtention($pathToFileBefore);
     $extentionAfter = getExtention($pathToFileAfter);
 
-    $parserBefore = parsers($extentionBefore);
-    $parserAfter = parsers($extentionAfter);
+    $contentBefore = readFile($realPathToFileBefore);
+    $contentAfter = readFile($realPathToFileAfter);
 
-    $dataBefore = $parserBefore($contentBefore);
-    $dataAfter = $parserAfter($contentAfter);
+    $parseBefore = selectParser($extentionBefore);
+    $parseAfter = selectParser($extentionAfter);
+
+    $dataBefore = $parseBefore($contentBefore);
+    $dataAfter = $parseAfter($contentAfter);
 
     $ast = buildAst($dataBefore, $dataAfter);
-    return formatters($format)($ast);
+    $format = "\Differ\Formatters\\{$format}\\format";
+    return $format($ast);
 }

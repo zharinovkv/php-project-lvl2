@@ -4,7 +4,7 @@ namespace Differ\parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parsers($extention)
+function selectParser($extention)
 {
     switch ($extention) {
         case 'json':
